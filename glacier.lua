@@ -15,7 +15,6 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
--- Main Tab
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox('General')
 
 LeftGroupBox:AddToggle('TriggerbotEnabled', {
@@ -38,7 +37,6 @@ LeftGroupBox:AddSlider('TriggerbotDelay', {
     Rounding = 0,
 })
 
--- Visuals Tab
 local VisualsGroup = Tabs.Visuals:AddLeftGroupbox('Visuals')
 
 VisualsGroup:AddToggle('ESPenabled', {
@@ -60,7 +58,6 @@ VisualsGroup:AddColorPicker('FOVColor', {
     Title = 'FOV Circle Color',
 })
 
--- Combat Tab
 local CombatGroup = Tabs.Combat:AddLeftGroupbox('Combat')
 
 CombatGroup:AddDropdown('TargetPriority', {
@@ -70,13 +67,11 @@ CombatGroup:AddDropdown('TargetPriority', {
     Tooltip = "How the target is selected."
 })
 
--- UI Settings Tab
 local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
 MenuGroup:AddButton('Unload', function() Library:Unload() end)
 MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
 Library.ToggleKeybind = Options.MenuKeybind
 
--- Addons
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
@@ -86,41 +81,29 @@ SaveManager:SetFolder('MyScriptHub/specific-game')
 SaveManager:BuildConfigSection(Tabs['UI Settings'])
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
--- Triggerbot Logic (Example)
 local function triggerbot()
     if not Toggles.TriggerbotEnabled.Value then return end
 
     local target = nil
-    -- Target selection logic based on priority.
     if Options.TargetPriority.Value == "Closest" then
-        -- Find closest target.
     elseif Options.TargetPriority.Value == "Health" then
-        -- Find target with lowest health.
     elseif Options.TargetPriority.Value == "Distance" then
-        --find target based on distance.
     end
 
     if target then
         wait(Options.TriggerbotDelay.Value / 1000)
-        -- Fire weapon at target.
-        -- game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = CFrame.new(game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Position, target.HumanoidRootPart.Position)
         game:GetService("Players").LocalPlayer.Character.Humanoid:EquipTool(game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Tool'))
         fireclickdetector(game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Tool'):FindFirstChildOfClass("ClickDetector"))
     end
 end
 
--- Camera Lock Logic (Example)
 local function camLock()
     if not Toggles.CamLock.Value then return end
 
     local target = nil
-    -- Target selection logic based on priority.
     if Options.TargetPriority.Value == "Closest" then
-        -- Find closest target.
     elseif Options.TargetPriority.Value == "Health" then
-        -- Find target with lowest health.
     elseif Options.TargetPriority.Value == "Distance" then
-        --find target based on distance.
     end
 
     if target then
@@ -128,16 +111,11 @@ local function camLock()
     end
 end
 
--- ESP and FOV Circle Logic (Example)
 local function visuals()
-    -- ESP Logic
     if Toggles.ESPenabled.Value then
-        -- Draw ESP boxes around players.
     end
 
-    -- FOV Circle Logic
     if Options.FOV.Value > 0 then
-        -- Draw FOV circle on screen.
         local circle = Drawing.new('Circle')
         circle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
         circle.Radius = Options.FOV.Value
@@ -151,7 +129,6 @@ local function visuals()
     end
 end
 
--- Main Loop
 task.spawn(function()
     while true do
         wait()
