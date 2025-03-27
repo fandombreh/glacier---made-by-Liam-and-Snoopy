@@ -48,7 +48,7 @@ Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
--- Camera Lock and Smoothness Implementation
+-- Camera Lock and Smoothness Implementation (Moved to Main Tab)
 
 local cameraLockEnabled = false
 local smoothness = 0.1 -- Default smoothness
@@ -57,9 +57,9 @@ local prediction = 0.0041 -- Built-in prediction value
 local cameraSubject = workspace.CurrentCamera
 local lastCameraCFrame = cameraSubject.CFrame
 
-local MovementGroup = Tabs['Movement']:AddLeftGroupbox("Camera Lock")
+local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock") --Change to Main tab
 
-MovementGroup:AddToggle("Camera Lock", {
+MainGroup:AddToggle("Camera Lock", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value;
@@ -67,7 +67,7 @@ MovementGroup:AddToggle("Camera Lock", {
     end;
 })
 
-MovementGroup:AddSlider("Smoothness", {
+MainGroup:AddSlider("Smoothness", {
     Min = 0,
     Max = 1,
     Default = smoothness,
