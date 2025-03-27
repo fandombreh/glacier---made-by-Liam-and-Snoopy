@@ -72,6 +72,7 @@ MainGroup:AddSlider("SmoothnessSlider", {
     Increment = 0.01,
     Callback = function(value)
         smoothness = value
+        print("Smoothness: ", smoothness) -- Debugging print
     end;
 })
 
@@ -93,3 +94,7 @@ function SetCameraTarget(player)
         targetPart = nil
     end
 end
+
+-- Example Usage: Lock onto a player (Replace 'targetPlayer' with an actual player object)
+local targetPlayer = game.Players.LocalPlayer
+SetCameraTarget(targetPlayer)
