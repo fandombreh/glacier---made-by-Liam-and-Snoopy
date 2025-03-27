@@ -6,6 +6,17 @@ local prediction = 0.027 -- Updated prediction value
 local camera = workspace.CurrentCamera
 local targetPart = nil -- Target to lock onto
 
+-- Function to set the lock-on target
+local function SetCameraTarget(player)
+    if player and player.Character and player.Character:FindFirstChild("Head") then
+        targetPart = player.Character.Head
+        print("Target successfully set to:", targetPart.Name)
+    else
+        targetPart = nil
+        print("No valid target found.")
+    end
+end
+
 -- UI Controls for Camera Lock
 local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock")
 
@@ -14,17 +25,10 @@ MainGroup:AddToggle("CameraLockToggle", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
-        print("Camera Lock toggled: ", cameraLockEnabled)
+        print("Camera Lock toggled:", cameraLockEnabled)
 
         if cameraLockEnabled then
-            local player = game.Players.LocalPlayer
-            SetCameraTarget(player)
-
-            if targetPart then
-                print("Target successfully set to: ", targetPart.Name)
-            else
-                print("No target found. Ensure a valid target exists.")
-            end
+            SetCameraTarget(game.Players.LocalPlayer)
         else
             targetPart = nil
             print("Camera Lock disabled and target cleared.")
@@ -40,32 +44,25 @@ MainGroup:AddSlider("SmoothnessSlider", {
     Increment = 0.01,
     Callback = function(value)
         smoothness = value
-        print("Smoothness adjusted to: ", smoothness)
+        print("Smoothness adjusted to:", smoothness)
     end
 })
 
+-- Camera update logic
 game:GetService("RunService").RenderStepped:Connect(function()
-    if cameraLockEnabled and targetPart then
-        local targetCFrame = targetPart.CFrame
-        local predictedPosition = targetCFrame.Position + (targetCFrame.LookVector * prediction)
-        local predictedCFrame = CFrame.new(predictedPosition)
+    if cameraLockEnabled then
+        if targetPart then
+            local targetCFrame = targetPart.CFrame
+            local predictedPosition = targetCFrame.Position + (targetCFrame.LookVector * prediction)
+            local predictedCFrame = CFrame.new(predictedPosition)
 
-        camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
-        print("Camera updated to follow target.")
-    elseif cameraLockEnabled and not targetPart then
-        print("Camera Lock is enabled but no target is set.")
+            camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
+            print("Camera updated to follow target.")
+        else
+            print("Camera Lock is enabled but no target is set.")
+        end
     end
 end)
 
--- Function to set the lock-on target
-function SetCameraTarget(player)
-    if player and player.Character and player.Character:FindFirstChild("Head") then
-        targetPart = player.Character.Head
-    else
-        targetPart = nil
-    end
-end
-
--- Example Usage: Lock onto a player (local player example)
-local targetPlayer = game.Players.LocalPlayer
-SetCameraTarget(targetPlayer)
+-- Initial Setup: Lock onto the local player
+SetCameraTarget(game.Players.LocalPlayer)
