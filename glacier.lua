@@ -48,22 +48,20 @@ Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
--- Camera Lock and Smoothness Implementation (Moved to Main Tab)
-
+-- Camera Lock and Smoothness Implementation
 local cameraLockEnabled = false
 local smoothness = 0.1 -- Default smoothness
-local prediction = 0.0041 -- Built-in prediction value
+local prediction = 0.0041 -- Default prediction
 
-local cameraSubject = workspace.CurrentCamera
-local lastCameraCFrame = cameraSubject.CFrame
+local camera = workspace.CurrentCamera
+local targetPart = nil -- Target to lock onto
 
-local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock") --Change to Main tab
+local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock") 
 
 MainGroup:AddToggle("Camera Lock", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value;
-        lastCameraCFrame = cameraSubject.CFrame;
     end;
 })
 
@@ -77,28 +75,21 @@ MainGroup:AddSlider("Smoothness", {
     end;
 })
 
-local function smoothCFrame(current, target, alpha)
-    local currentPos, currentRot = current.Position, current.Rotation
-    local targetPos, targetRot = target.Position, target.Rotation
-
-    local newPos = currentPos:Lerp(targetPos, alpha)
-    local newRot = currentRot:Lerp(targetRot, alpha)
-
-    return CFrame.new(newPos) * CFrame.fromMatrix(Vector3.new(), newRot)
-end
-
 game:GetService("RunService").RenderStepped:Connect(function()
-    if cameraLockEnabled then
-        local targetCFrame = cameraSubject.CFrame
+    if cameraLockEnabled and targetPart then
+        local targetCFrame = targetPart.CFrame
+        local predictedPosition = targetCFrame.Position + (targetCFrame.LookVector * prediction)
+        local predictedCFrame = CFrame.new(predictedPosition)
 
-        local predictedPosition = targetCFrame.Position + (targetCFrame.Position - lastCameraCFrame.Position) * prediction
-        local predictedRotation = targetCFrame.Rotation + (targetCFrame.Rotation - lastCameraCFrame.Rotation) * prediction
-
-        local predictedCFrame = CFrame.new(predictedPosition) * CFrame.fromMatrix(Vector3.new(), predictedRotation)
-
-        lastCameraCFrame = cameraSubject.CFrame -- update last frame before lerping
-
-        cameraSubject.CFrame = smoothCFrame(cameraSubject.CFrame, predictedCFrame, smoothness)
-
+        camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
     end
 end)
+
+-- Function to set the lock-on target (Example: Lock onto a player's head)
+function SetCameraTarget(player)
+    if player and player.Character and player.Character:FindFirstChild("Head") then
+        targetPart = player.Character.Head
+    else
+        targetPart = nil
+    end
+end
