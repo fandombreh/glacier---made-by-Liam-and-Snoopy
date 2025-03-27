@@ -119,6 +119,15 @@ SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 ThemeManager:SetFolder('MyScriptHub')
 SaveManager:SetFolder('MyScriptHub/specific-game')
 SaveManager:BuildConfigSection(Tabs['UI Settings'])
+
+-- Apply custom colors *before* ThemeManager applies its defaults
+for _, tab in pairs(Tabs) do
+    ThemeManager:ApplyCustomColors(tab, {
+        BackgroundColor = tab.Config.BackgroundColor,
+        TextColor = tab.Config.TextColor,
+    })
+end
+
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 local function triggerbot()
@@ -161,20 +170,5 @@ local function visuals()
         circle.Radius = Options.FOV.Value
         circle.Thickness = 1
         circle.Color = Options.FOVColor.Value
-        circle.Filled = false
-        circle.Visible = true;
-
-        task.wait()
-        circle:Remove();
-    end
-end
-
-task.spawn(function()
-    while true do
-        wait()
-        triggerbot()
-        camLock()
-        visuals()
-        if Library.Unloaded then break end
     end
 end)
