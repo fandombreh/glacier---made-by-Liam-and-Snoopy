@@ -1,49 +1,3 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam675/skibidiliamgoat/refs/heads/main/imnotgoingnowhere",true))()
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/SaveManager.lua"))()
-
-local Window = Library:CreateWindow({
-    Title = 'Glacier - Made By Liam And Snoopy',
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
-})
-
-local Tabs = {
-    Main = Window:AddTab('Main'),
-    Movement = Window:AddTab('Movement'),
-    Visuals = Window:AddTab('Visuals'),
-    ['UI Settings'] = Window:AddTab('UI Settings'),
-}
-
-local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
-
-MenuGroup:AddButton('Unload', function()
-    Library:Unload()
-end)
-
-MenuGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
-    Default = 'End',
-    NoUI = true,
-    Text = 'Menu Keybind'
-})
-
-local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-ThemeManager:SetFolder('EuphoriaHub')
-SaveManager:SetFolder('EuphoriaHub/configs')
-ThemeManager:ApplyToTab(Tabs['UI Settings'])
-
-Library.ToggleKeybind = Options.MenuKeybind
-Library:SetWatermarkVisibility(false)
-Library.KeybindFrame.Visible = true
-
-Library:OnUnload(function()
-    Library.Unloaded = true
-end)
-
 -- Camera Lock Variables
 local cameraLockEnabled = false
 local smoothness = 0.1  -- Default smoothness
@@ -60,7 +14,14 @@ MainGroup:AddToggle("CameraLockToggle", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
-        print("Camera Lock: ", cameraLockEnabled) -- Debugging print
+        if cameraLockEnabled then
+            print("Camera Lock enabled. Waiting for target...")
+            -- Optional: Set a default target (e.g., player's own head)
+            local player = game.Players.LocalPlayer
+            SetCameraTarget(player)  -- Replace with dynamic target selection if needed
+        else
+            print("Camera Lock disabled.")
+        end
     end;
 })
 
@@ -72,7 +33,7 @@ MainGroup:AddSlider("SmoothnessSlider", {
     Increment = 0.01,
     Callback = function(value)
         smoothness = value
-        print("Smoothness: ", smoothness) -- Debugging print
+        print("Smoothness adjusted to: ", smoothness) -- Debugging print
     end;
 })
 
@@ -83,18 +44,19 @@ game:GetService("RunService").RenderStepped:Connect(function()
         local predictedCFrame = CFrame.new(predictedPosition)
 
         camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
+    else
+        -- Optional: Reset camera to default behavior when camera lock is disabled
+        camera.CFrame = workspace.CurrentCamera.CFrame
     end
 end)
 
--- Function to set the lock-on target (Example: Lock onto a player's head)
+-- Function to set the lock-on target
 function SetCameraTarget(player)
     if player and player.Character and player.Character:FindFirstChild("Head") then
         targetPart = player.Character.Head
+        print("Target acquired: ", targetPart.Name)
     else
         targetPart = nil
+        print("Failed to acquire target.")
     end
 end
-
--- Example Usage: Lock onto a player (Replace 'targetPlayer' with an actual player object)
-local targetPlayer = game.Players.LocalPlayer
-SetCameraTarget(targetPlayer)
