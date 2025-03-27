@@ -14,13 +14,22 @@ MainGroup:AddToggle("CameraLockToggle", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
+        print("Camera Lock toggled: ", cameraLockEnabled) -- Debugging print
+
         if cameraLockEnabled then
-            print("Camera Lock enabled. Waiting for target...")
-            -- Optional: Set a default target (e.g., player's own head)
+            -- Attempt to set a default target (local player example)
             local player = game.Players.LocalPlayer
-            SetCameraTarget(player)  -- Replace with dynamic target selection if needed
+            SetCameraTarget(player)
+
+            if targetPart then
+                print("Target successfully set to: ", targetPart.Name)
+            else
+                print("No target found. Ensure a valid target exists.")
+            end
         else
-            print("Camera Lock disabled.")
+            -- Reset the target when disabled
+            targetPart = nil
+            print("Camera Lock disabled and target cleared.")
         end
     end;
 })
@@ -44,9 +53,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
         local predictedCFrame = CFrame.new(predictedPosition)
 
         camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
-    else
-        -- Optional: Reset camera to default behavior when camera lock is disabled
-        camera.CFrame = workspace.CurrentCamera.CFrame
+        print("Camera updated to follow target.")
+    elseif cameraLockEnabled and not targetPart then
+        print("Camera Lock is enabled but no target is set.")
     end
 end)
 
@@ -54,9 +63,11 @@ end)
 function SetCameraTarget(player)
     if player and player.Character and player.Character:FindFirstChild("Head") then
         targetPart = player.Character.Head
-        print("Target acquired: ", targetPart.Name)
     else
         targetPart = nil
-        print("Failed to acquire target.")
     end
 end
+
+-- Example Usage: Lock onto a player (local player example)
+local targetPlayer = game.Players.LocalPlayer
+SetCameraTarget(targetPlayer)
