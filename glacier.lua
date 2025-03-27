@@ -1,13 +1,13 @@
 -- Camera Lock Variables
 local cameraLockEnabled = false
 local smoothness = 0.1  -- Default smoothness
-local prediction = 0.0041 -- Default prediction
+local prediction = 0.027 -- Updated prediction value
 
 local camera = workspace.CurrentCamera
 local targetPart = nil -- Target to lock onto
 
 -- UI Controls for Camera Lock
-local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock") 
+local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock")
 
 MainGroup:AddToggle("CameraLockToggle", {
     Text = "Enable Camera Lock",
@@ -17,7 +17,7 @@ MainGroup:AddToggle("CameraLockToggle", {
         print("Camera Lock toggled: ", cameraLockEnabled) -- Debugging print
 
         if cameraLockEnabled then
-            -- Attempt to set a default target (local player example)
+            -- Attempt to set a default target
             local player = game.Players.LocalPlayer
             SetCameraTarget(player)
 
