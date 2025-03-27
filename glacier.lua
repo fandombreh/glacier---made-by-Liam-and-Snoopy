@@ -44,6 +44,12 @@ MainGroup:AddSlider('Smoothness', {
     Tooltip = 'Set the smoothness level for camera lock.'
 })
 
+-- UI Settings tab setup (moved after Theme/Save manager setup)
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+ThemeManager:SetFolder('EuphoriaHub')
+SaveManager:SetFolder('EuphoriaHub/configs')
+
 local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
 
 MenuGroup:AddButton('Unload', function()
@@ -58,13 +64,6 @@ MenuGroup:AddKeyPicker('MenuKeybind', {
 })
 
 local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
-ThemeManager:SetLibrary(Library)
-
-SaveManager:SetLibrary(Library)
-
-ThemeManager:SetFolder('EuphoriaHub')
-SaveManager:SetFolder('EuphoriaHub/configs')
-
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 Library.ToggleKeybind = Library.Options.MenuKeybind
