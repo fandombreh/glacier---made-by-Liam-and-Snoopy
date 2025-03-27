@@ -14,10 +14,9 @@ MainGroup:AddToggle("CameraLockToggle", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
-        print("Camera Lock toggled: ", cameraLockEnabled) -- Debugging print
+        print("Camera Lock toggled: ", cameraLockEnabled)
 
         if cameraLockEnabled then
-            -- Attempt to set a default target
             local player = game.Players.LocalPlayer
             SetCameraTarget(player)
 
@@ -27,11 +26,10 @@ MainGroup:AddToggle("CameraLockToggle", {
                 print("No target found. Ensure a valid target exists.")
             end
         else
-            -- Reset the target when disabled
             targetPart = nil
             print("Camera Lock disabled and target cleared.")
         end
-    end;
+    end
 })
 
 MainGroup:AddSlider("SmoothnessSlider", {
@@ -42,8 +40,8 @@ MainGroup:AddSlider("SmoothnessSlider", {
     Increment = 0.01,
     Callback = function(value)
         smoothness = value
-        print("Smoothness adjusted to: ", smoothness) -- Debugging print
-    end;
+        print("Smoothness adjusted to: ", smoothness)
+    end
 })
 
 game:GetService("RunService").RenderStepped:Connect(function()
