@@ -17,13 +17,37 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
+-- Camera lock functionality
+local cameraLockEnabled = false
+local predictionValue = 0.027
+local smoothness = 1
+
+local function updateCameraLock()
+    if cameraLockEnabled then
+        local camera = workspace.CurrentCamera
+        local humanoidRootPart = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if camera and humanoidRootPart then
+            local targetPosition = humanoidRootPart.Position + humanoidRootPart.CFrame.LookVector * predictionValue
+            local currentPosition = camera.CFrame.p
+            local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.1)
+            camera.CFrame = CFrame.new(newPosition, humanoidRootPart.Position)
+        end
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
+
 -- Adding the camera lock settings to the Main tab
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera in place.'
+    Tooltip = 'Locks the camera in place.',
+    Callback = function(value)
+        cameraLockEnabled = value
+    end
 })
 
 MainGroup:AddSlider('PredictionValue', {
@@ -32,7 +56,10 @@ MainGroup:AddSlider('PredictionValue', {
     Min = 0,
     Max = 1,
     Rounding = 3,
-    Tooltip = 'Adjust the prediction value.'
+    Tooltip = 'Adjust the prediction value.',
+    Callback = function(value)
+        predictionValue = value
+    end
 })
 
 MainGroup:AddSlider('Smoothness', {
@@ -41,10 +68,13 @@ MainGroup:AddSlider('Smoothness', {
     Min = 0,
     Max = 10,
     Rounding = 1,
-    Tooltip = 'Set the smoothness level for camera lock.'
+    Tooltip = 'Set the smoothness level for camera lock.',
+    Callback = function(value)
+        smoothness = value
+    end
 })
 
--- UI Settings tab setup (moved after Theme/Save manager setup)
+-- UI Settings tab setup
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 ThemeManager:SetFolder('EuphoriaHub')
