@@ -31,19 +31,15 @@ MenuGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
 
 local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
 ThemeManager:SetLibrary(Library)
-
 SaveManager:SetLibrary(Library)
-
 ThemeManager:SetFolder('EuphoriaHub')
 SaveManager:SetFolder('EuphoriaHub/configs')
-
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 Library.ToggleKeybind = Options.MenuKeybind
-
 Library:SetWatermarkVisibility(false)
-
 Library.KeybindFrame.Visible = true
+
 Library:OnUnload(function()
     Library.Unloaded = true
 end)
@@ -63,7 +59,7 @@ MainGroup:AddToggle("CameraLockToggle", {
     Text = "Enable Camera Lock",
     Default = false,
     Callback = function(value)
-        cameraLockEnabled = value;
+        cameraLockEnabled = value
     end;
 })
 
@@ -74,7 +70,7 @@ MainGroup:AddSlider("SmoothnessSlider", {
     Default = smoothness,
     Increment = 0.01,
     Callback = function(value)
-        smoothness = value;
+        smoothness = value
     end;
 })
 
