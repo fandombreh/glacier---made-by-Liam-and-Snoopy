@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam675/skibidiliamgoat/refs/heads/main/imnotgoingnowhere",true))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam675/skibidiliamgoat/refs/heads/main/imnotgoingnowhere", true))()
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/SaveManager.lua"))()
 
@@ -50,7 +50,8 @@ MenuGroup:AddButton('Unload', function()
     Library:Unload()
 end)
 
-MenuGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
+MenuGroup:AddLabel('Menu Keybind')
+MenuGroup:AddKeyPicker('MenuKeybind', {
     Default = 'End',
     NoUI = true,
     Text = 'Menu Keybind'
@@ -66,7 +67,7 @@ SaveManager:SetFolder('EuphoriaHub/configs')
 
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
-Library.ToggleKeybind = Options.MenuKeybind
+Library.ToggleKeybind = Library.Options.MenuKeybind
 
 Library:SetWatermarkVisibility(false)
 
