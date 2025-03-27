@@ -48,24 +48,27 @@ Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
--- Camera Lock and Smoothness Implementation
+-- Camera Lock Variables
 local cameraLockEnabled = false
-local smoothness = 0.1 -- Default smoothness
+local smoothness = 0.1  -- Default smoothness
 local prediction = 0.0041 -- Default prediction
 
 local camera = workspace.CurrentCamera
 local targetPart = nil -- Target to lock onto
 
+-- UI Controls for Camera Lock
 local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock") 
 
-MainGroup:AddToggle("Camera Lock", {
+MainGroup:AddToggle("CameraLockToggle", {
+    Text = "Enable Camera Lock",
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value;
     end;
 })
 
-MainGroup:AddSlider("Smoothness", {
+MainGroup:AddSlider("SmoothnessSlider", {
+    Text = "Smoothness",
     Min = 0,
     Max = 1,
     Default = smoothness,
