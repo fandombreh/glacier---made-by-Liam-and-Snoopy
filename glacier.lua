@@ -1,80 +1,76 @@
--- Camera Lock Variables
-local cameraLockEnabled = false
-local smoothness = 0.1  -- Default smoothness
-local prediction = 0.027 -- Updated prediction value
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam675/skibidiliamgoat/refs/heads/main/imnotgoingnowhere",true))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/SaveManager.lua"))()
 
-local camera = workspace.CurrentCamera
-local targetPart = nil -- Target to lock onto
+local Window = Library:CreateWindow({
+    Title = 'Glacier - Made By Liam And Snoopy',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
 
--- Function to set the lock-on target
-local function SetCameraTarget(player)
-    if player and player.Character and player.Character:FindFirstChild("Head") then
-        targetPart = player.Character.Head
-        print("Target successfully set to:", targetPart.Name)
-    else
-        targetPart = nil
-        print("No valid target found.")
-    end
-end
+local Tabs = {
+    Main = Window:AddTab('Main'),
+    Movement = Window:AddTab('Movement'),
+    Visuals = Window:AddTab('Visuals'),
+    ['UI Settings'] = Window:AddTab('UI Settings'),
+}
 
--- UI Controls for Camera Lock
-local success, errorMsg = pcall(function()
-    local MainGroup = Tabs['Main']:AddLeftGroupbox("Camera Lock")
-    
-    MainGroup:AddToggle("CameraLockToggle", {
-        Text = "Enable Camera Lock",
-        Default = false,
-        Callback = function(value)
-            cameraLockEnabled = value
-            print("Camera Lock toggled:", cameraLockEnabled)
-    
-            if cameraLockEnabled then
-                SetCameraTarget(game.Players.LocalPlayer)
-            else
-                targetPart = nil
-                print("Camera Lock disabled and target cleared.")
-            end
-        end
-    })
-    
-    MainGroup:AddSlider("SmoothnessSlider", {
-        Text = "Smoothness",
-        Min = 0,
-        Max = 1,
-        Default = smoothness,
-        Increment = 0.01,
-        Callback = function(value)
-            smoothness = value
-            print("Smoothness adjusted to:", smoothness)
-        end
-    })
+-- Adding the camera lock settings to the Main tab
+local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
+
+MainGroup:AddToggle('CameraLock', {
+    Text = 'Enable Camera Lock',
+    Default = false,
+    Tooltip = 'Locks the camera in place.'
+})
+
+MainGroup:AddSlider('PredictionValue', {
+    Text = 'Prediction',
+    Default = 0.027,
+    Min = 0,
+    Max = 1,
+    Rounding = 3,
+    Tooltip = 'Adjust the prediction value.'
+})
+
+MainGroup:AddSlider('Smoothness', {
+    Text = 'Smoothness',
+    Default = 1,
+    Min = 0,
+    Max = 10,
+    Rounding = 1,
+    Tooltip = 'Set the smoothness level for camera lock.'
+})
+
+local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
+
+MenuGroup:AddButton('Unload', function()
+    Library:Unload()
 end)
 
-if not success then
-    print("Error setting up UI Controls:", errorMsg)
-end
+MenuGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
+    Default = 'End',
+    NoUI = true,
+    Text = 'Menu Keybind'
+})
 
--- Camera update logic
-game:GetService("RunService").RenderStepped:Connect(function()
-    print("RenderStepped running...")
-    
-    if cameraLockEnabled then
-        if targetPart then
-            local targetCFrame = targetPart.CFrame
-            local predictedPosition = targetCFrame.Position + (targetCFrame.LookVector * prediction)
-            local predictedCFrame = CFrame.new(predictedPosition)
+local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
+ThemeManager:SetLibrary(Library)
 
-            camera.CFrame = camera.CFrame:Lerp(predictedCFrame, smoothness)
-            print("Camera updated to follow target.")
-        else
-            print("Camera Lock is enabled but no target is set.")
-        end
-    end
+SaveManager:SetLibrary(Library)
+
+ThemeManager:SetFolder('EuphoriaHub')
+SaveManager:SetFolder('EuphoriaHub/configs')
+
+ThemeManager:ApplyToTab(Tabs['UI Settings'])
+
+Library.ToggleKeybind = Options.MenuKeybind
+
+Library:SetWatermarkVisibility(false)
+
+Library.KeybindFrame.Visible = true
+Library:OnUnload(function()
+    Library.Unloaded = true
 end)
-
--- Initial Setup: Lock onto the local player
-if game.Players.LocalPlayer then
-    SetCameraTarget(game.Players.LocalPlayer)
-else
-    print("LocalPlayer not found. Ensure this script is run locally.")
-end
