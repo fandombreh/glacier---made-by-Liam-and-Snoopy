@@ -74,7 +74,7 @@ MainGroup:AddSlider('Smoothness', {
     end
 })
 
--- UI Settings tab setup
+-- Restoring UI Settings tab functionality
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 ThemeManager:SetFolder('EuphoriaHub')
