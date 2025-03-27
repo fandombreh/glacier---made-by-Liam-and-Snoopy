@@ -1,4 +1,4 @@
-local repo = "https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/"
+local repo = "https://github.com/fandombreh/glacier---made-by-Liam-and-Snoopy/edit/main/glacier.lua"
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
@@ -112,6 +112,20 @@ MenuGroup:AddButton('Unload', function() Library:Unload() end, {BackgroundColor 
 MenuGroup:AddLabel('Menu bind', {TextColor = CustomColors.LabelTextColor}):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind', BackgroundColor = CustomColors.KeyPickerBackgroundColor, TextColor = CustomColors.KeyPickerTextColor })
 Library.ToggleKeybind = Options.MenuKeybind
 
+-- UI Settings Tab - Color Pickers
+Tabs['UI Settings']:AddColorPicker('WindowBackgroundColor', {
+    Default = CustomColors.WindowBackgroundColor,
+    Title = 'Window Background',
+})
+Tabs['UI Settings']:AddColorPicker('TabBackgroundColor', {
+    Default = CustomColors.TabBackgroundColor,
+    Title = 'Tab Background',
+})
+Tabs['UI Settings']:AddColorPicker('GroupboxBackgroundColor', {
+    Default = CustomColors.GroupboxBackgroundColor,
+    Title = 'Groupbox Background',
+})
+
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
@@ -130,6 +144,22 @@ end
 
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
+-- Update functions to change window and tabs background colors.
+local function updateBackgroundColors()
+    Window:SetBackgroundColor(Options.WindowBackgroundColor.Value)
+    for _, tab in pairs(Tabs) do
+        tab:SetBackgroundColor(Options.TabBackgroundColor.Value)
+        for _, groupbox in pairs(tab.LeftGroupboxes) do
+            groupbox:SetBackgroundColor(Options.GroupboxBackgroundColor.Value)
+        end
+    end
+end
+
+-- Connect the color pickers to the update function.
+Options.WindowBackgroundColor:OnChanged(updateBackgroundColors)
+Options.TabBackgroundColor:OnChanged(updateBackgroundColors)
+Options.GroupboxBackgroundColor:OnChanged(updateBackgroundColors)
+
 local function triggerbot()
     if not Toggles.TriggerbotEnabled.Value then return end
 
@@ -139,36 +169,4 @@ local function triggerbot()
     elseif Options.TargetPriority.Value == "Distance" then
     end
 
-    if target then
-        wait(Options.TriggerbotDelay.Value / 1000)
-        game:GetService("Players").LocalPlayer.Character.Humanoid:EquipTool(game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Tool'))
-        fireclickdetector(game:GetService('Players').LocalPlayer.Character:FindFirstChildOfClass('Tool'):FindFirstChildOfClass("ClickDetector"))
-    end
-end
-
-local function camLock()
-    if not Toggles.CamLock.Value then return end
-
-    local target = nil
-    if Options.TargetPriority.Value == "Closest" then
-    elseif Options.TargetPriority.Value == "Health" then
-    elseif Options.TargetPriority.Value == "Distance" then
-    end
-
-    if target then
-        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.p, target.HumanoidRootPart.Position)
-    end
-end
-
-local function visuals()
-    if Toggles.ESPenabled.Value then
-    end
-
-    if Options.FOV.Value > 0 then
-        local circle = Drawing.new('Circle')
-        circle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
-        circle.Radius = Options.FOV.Value
-        circle.Thickness = 1
-        circle.Color = Options.FOVColor.Value
-    end
-end)
+    if target
