@@ -60,6 +60,7 @@ MainGroup:AddToggle("CameraLockToggle", {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
+        print("Camera Lock: ", cameraLockEnabled) -- Debugging print
     end;
 })
 
