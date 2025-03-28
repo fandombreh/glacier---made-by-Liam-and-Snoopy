@@ -24,7 +24,7 @@ local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
 local triggerDelay = 50
-local lockTargetPart = "Head" 
+local lockTargetPart = "Head" -- Default to "Head"
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -76,53 +76,34 @@ local function triggerbot()
 end
 
 local function updateCameraLock()
-    if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
+    if cameraLockEnabled then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
+        local targetPlayer = isTracking and trackingTarget or getNearestPlayer()
 
-        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character then
             local targetPart
-            
+
             if lockTargetPart == "Head" then
-                targetPart = trackingTarget.Character:FindFirstChild("Head")
+                targetPart = targetPlayer.Character:FindFirstChild("Head")
             elseif lockTargetPart == "Torso" then
-              
-                targetPart = trackingTarget.Character:FindFirstChild("UpperTorso") or trackingTarget.Character:FindFirstChild("LowerTorso")
+                -- Prioritize UpperTorso, then LowerTorso, then HumanoidRootPart as a fallback
+                targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso") or targetPlayer.Character:FindFirstChild("HumanoidRootPart")
             end
 
             if targetPart then
                 local targetPosition = targetPart.Position
-                local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
+                local predictedPosition = targetPosition
 
-                local predictedPosition = targetPosition + targetVelocity * predictionValue
+                if isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
+                    predictedPosition = targetPosition + targetVelocity * predictionValue
+                end
 
                 local currentPosition = camera.CFrame.p
                 local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
                 local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
-                camera.CFrame = CFrame.new(newPosition, targetPart.Position)
-            end
-        end
-    elseif cameraLockEnabled and not isTracking then
-        local camera = workspace.CurrentCamera
-        local targetPlayer = getNearestPlayer()
-        local localPlayer = game.Players.LocalPlayer
-
-        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPart
-            
-            if lockTargetPart == "Head" then
-                targetPart = targetPlayer.Character:FindFirstChild("Head")
-            elseif lockTargetPart == "Torso" then
-                
-                targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso")
-            end
-
-            if targetPart then
-                local targetPosition = targetPart.Position
-                local currentPosition = camera.CFrame.p
-                local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-                local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
                 camera.CFrame = CFrame.new(newPosition, targetPart.Position)
             end
         end
@@ -179,8 +160,8 @@ MainGroup:AddSlider('Smoothness', {
 
 MainGroup:AddDropdown('LockTargetPart', {
     Text = 'Lock Target Part',
-    Default = 'Head', 
-    Values = {'Head', 'Torso'},  
+    Default = 'Head', -- Default to "Head"
+    Values = {'Head', 'Torso'}, -- Choices for Head or Torso
     Callback = function(value)
         lockTargetPart = value
     end
@@ -212,7 +193,7 @@ game.Players.LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(healt
     if health <= 0 then
         isTracking = false
     end
-end)
+})
 
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
