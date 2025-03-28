@@ -2,11 +2,6 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam6
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/SaveManager.lua"))()
 
-if not Library then
-    warn("[ERROR] Library failed to load!")
-    return
-end
-
 local Window = Library:CreateWindow({
     Title = 'Glacier - Made By Liam And Snoopy',
     Center = true,
@@ -22,11 +17,6 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
-if not Tabs['UI Settings'] then
-    warn("[ERROR] UI Settings tab is nil!")
-    return
-end
-
 -- Camera lock functionality
 local cameraLockEnabled = false
 local predictionValue = 0.027
@@ -34,40 +24,33 @@ local smoothness = 1
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
-    local localCharacter = localPlayer.Character
-    if not localCharacter then return nil end
-
-    local localRoot = localCharacter:FindFirstChild("HumanoidRootPart")
-    if not localRoot then return nil end
-
     local nearestPlayer = nil
-    local nearestDistance = math.huge
+    local shortestDistance = math.huge
 
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player ~= localPlayer and player.Character then
-            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
-            if targetRoot then
-                local distance = (localRoot.Position - targetRoot.Position).Magnitude
-                if distance < nearestDistance then
-                    nearestDistance = distance
-                    nearestPlayer = targetRoot
-                end
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (localPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestPlayer = player
             end
         end
     end
+
     return nearestPlayer
 end
 
 local function updateCameraLock()
     if cameraLockEnabled then
         local camera = workspace.CurrentCamera
-        local targetRoot = getNearestPlayer()
+        local localPlayer = game.Players.LocalPlayer
+        local targetPlayer = getNearestPlayer()
 
-        if camera and targetRoot then
-            local targetPosition = targetRoot.Position + Vector3.new(0, 2, 0) -- Adjust height targeting
-            local currentPosition = camera.CFrame.Position
+        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.CFrame.LookVector * predictionValue
+            local currentPosition = camera.CFrame.p
             local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.1)
-            camera.CFrame = CFrame.new(newPosition, targetRoot.Position)
+            camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
         end
     end
 end
@@ -80,7 +63,7 @@ local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks onto the nearest player.',
+    Tooltip = 'Locks the camera onto the nearest player.',
     Callback = function(value)
         cameraLockEnabled = value
     end
@@ -110,7 +93,7 @@ MainGroup:AddSlider('Smoothness', {
     end
 })
 
--- Restoring UI Settings tab functionality
+-- UI Settings tab setup
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 ThemeManager:SetFolder('EuphoriaHub')
@@ -130,19 +113,12 @@ MenuGroup:AddKeyPicker('MenuKeybind', {
 })
 
 local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
-
-ThemeGroup:AddButton('Save Theme', function()
-    ThemeManager:SaveTheme()
-end)
-
-ThemeGroup:AddButton('Load Theme', function()
-    ThemeManager:LoadTheme()
-end)
-
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 Library.ToggleKeybind = Library.Options.MenuKeybind
+
 Library:SetWatermarkVisibility(false)
+
 Library.KeybindFrame.Visible = true
 Library:OnUnload(function()
     Library.Unloaded = true
