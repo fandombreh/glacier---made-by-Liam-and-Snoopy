@@ -26,11 +26,12 @@ local triggerbotEnabled = false
 local triggerDelay = 50
 
 local UserInputService = game:GetService("UserInputService")
+local workspace = game:GetService("Workspace")
 
-
-local triggerbotHotkey = Enum.KeyCode.T  
-
-local cameraLockHotkey = Enum.KeyCode.C  
+-- Hotkey for Triggerbot
+local triggerbotHotkey = Enum.KeyCode.T  -- Default T key to toggle Triggerbot
+-- Hotkey for Camera Lock
+local cameraLockHotkey = Enum.KeyCode.C  -- Default C key to toggle Camera Lock
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -50,12 +51,30 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
+-- Function to check if crosshair is aimed at a player
+local function isAimingAtPlayer(target)
+    local localPlayer = game.Players.LocalPlayer
+    local camera = workspace.CurrentCamera
+    local mouse = localPlayer:GetMouse()
+
+    local ray = camera:ScreenPointToRay(mouse.X, mouse.Y)
+    local hitPart, hitPosition = workspace:FindPartOnRayWithWhitelist(ray, {target.Character})
+
+    -- Check if the hit part is the player's HumanoidRootPart or a part of the player
+    return hitPart and hitPart.Parent == target.Character
+end
+
+-- Triggerbot function with added checks
 local function triggerbot()
     while triggerbotEnabled do
         local target = getNearestPlayer()
         if target and target.Character and target.Character:FindFirstChild("Humanoid") then
             local humanoid = target.Character.Humanoid
-            if humanoid.Health > 0 then
+            local localPlayer = game.Players.LocalPlayer
+
+            -- Check if the player has a gun out and is aiming at a target
+            local tool = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Tool")
+            if tool and tool.Name == "Gun" and humanoid.Health > 0 and isAimingAtPlayer(target) then
                 wait(triggerDelay / 1000)
                 mouse1click()
             end
@@ -115,11 +134,11 @@ game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
     isTracking = false
 end)
 
-
+-- Hotkey handlers
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
 
-    
+    -- Triggerbot Hotkey (T)
     if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == triggerbotHotkey then
         triggerbotEnabled = not triggerbotEnabled
         if triggerbotEnabled then
@@ -127,7 +146,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         end
     end
 
-   
+    -- Camera Lock Hotkey (C)
     if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == cameraLockHotkey then
         cameraLockEnabled = not cameraLockEnabled
     end
@@ -218,5 +237,3 @@ Library.KeybindFrame.Visible = true
 Library:OnUnload(function()
     Library.Unloaded = true
 end)
-
-print("[SUCCESS] Triggerbot with delay added to Main tab!")
