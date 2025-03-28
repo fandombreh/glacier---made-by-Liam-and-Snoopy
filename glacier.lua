@@ -22,6 +22,8 @@ local predictionValue = 0.5
 local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
+local triggerbotEnabled = false
+local triggerDelay = 50 
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -39,6 +41,20 @@ local function getNearestPlayer()
     end
 
     return nearestPlayer
+end
+
+local function triggerbot()
+    while triggerbotEnabled do
+        local target = getNearestPlayer()
+        if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+            local humanoid = target.Character.Humanoid
+            if humanoid.Health > 0 then
+                wait(triggerDelay / 1000)
+                mouse1click()
+            end
+        end
+        wait(0.1)
+    end
 end
 
 local function onDamageTaken(damage, attacker)
@@ -66,7 +82,6 @@ local function updateCameraLock()
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
             local currentPosition = camera.CFrame.p
-
             local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
             local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
@@ -125,6 +140,28 @@ MainGroup:AddSlider('Smoothness', {
     end
 })
 
+MainGroup:AddToggle('Triggerbot', {
+    Text = 'Enable Triggerbot',
+    Default = false,
+    Callback = function(value)
+        triggerbotEnabled = value
+        if triggerbotEnabled then
+            spawn(triggerbot)
+        end
+    end
+})
+
+MainGroup:AddSlider('TriggerDelay', {
+    Text = 'Trigger Delay (ms)',
+    Default = 50,
+    Min = 0,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(value)
+        triggerDelay = value
+    end
+})
+
 game.Players.LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(health)
     onHealthChanged(health)
 end)
@@ -151,12 +188,10 @@ local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 Library.ToggleKeybind = Library.Options.MenuKeybind
-
 Library:SetWatermarkVisibility(false)
-
 Library.KeybindFrame.Visible = true
 Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
-print("[SUCCESS] UI Settings tab should now be working!")
+print("[SUCCESS] Triggerbot with delay added to Main tab!")
