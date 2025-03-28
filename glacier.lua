@@ -47,7 +47,9 @@ end
 local function triggerShot()
     if triggerbotEnabled and Mouse.Target and isTargetValid(Mouse.Target) then
         wait(triggerDelay / 1000) -- Convert ms to seconds
-        mouse1click()
+        -- Simulate mouse click using VirtualInputManager
+        game:GetService("VirtualInputManager"):SendInputBegin(Enum.UserInputType.MouseButton1)
+        game:GetService("VirtualInputManager"):SendInputEnd(Enum.UserInputType.MouseButton1)
     end
 end
 
