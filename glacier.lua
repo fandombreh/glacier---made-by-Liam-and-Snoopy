@@ -24,7 +24,7 @@ local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
 local triggerDelay = 50
-local lockTargetPart = "Head"
+local lockTargetPart = "Head" -- Default to "Head"
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -67,7 +67,8 @@ local function triggerbot()
                 local humanoid = target.Character.Humanoid
                 if humanoid.Health > 0 then
                     wait(triggerDelay / 1000)
-                    mouse1click()
+                    local mouse = game.Players.LocalPlayer:GetMouse()
+                    mouse1click()  -- Adjust this to your method of triggering mouse click
                 end
             end
         end
@@ -87,7 +88,7 @@ local function updateCameraLock()
             if lockTargetPart == "Head" then
                 targetPart = targetPlayer.Character:FindFirstChild("Head")
             elseif lockTargetPart == "Torso" then
-                
+                -- Prioritize UpperTorso, then LowerTorso, then HumanoidRootPart as a fallback
                 targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso") or targetPlayer.Character:FindFirstChild("HumanoidRootPart")
             end
 
@@ -160,8 +161,8 @@ MainGroup:AddSlider('Smoothness', {
 
 MainGroup:AddDropdown('LockTargetPart', {
     Text = 'Lock Target Part',
-    Default = 'Head', 
-    Values = {'Head', 'Torso'}, 
+    Default = 'Head', -- Default to "Head"
+    Values = {'Head', 'Torso'}, -- Choices for Head or Torso
     Callback = function(value)
         lockTargetPart = value
     end
