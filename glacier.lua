@@ -2,6 +2,11 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liam6
 local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/LionTheGreatRealFrFr/MobileLinoriaLib/main/addons/SaveManager.lua"))()
 
+if not Library then
+    warn("[ERROR] Library failed to load!")
+    return
+end
+
 local Window = Library:CreateWindow({
     Title = 'Glacier - Made By Liam And Snoopy',
     Center = true,
@@ -16,6 +21,11 @@ local Tabs = {
     Visuals = Window:AddTab('Visuals'),
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
+
+if not Tabs['UI Settings'] then
+    warn("[ERROR] UI Settings tab is nil!")
+    return
+end
 
 -- Camera lock functionality
 local cameraLockEnabled = false
@@ -94,13 +104,22 @@ MenuGroup:AddKeyPicker('MenuKeybind', {
 })
 
 local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
+
+ThemeGroup:AddButton('Save Theme', function()
+    ThemeManager:SaveTheme()
+end)
+
+ThemeGroup:AddButton('Load Theme', function()
+    ThemeManager:LoadTheme()
+end)
+
 ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 Library.ToggleKeybind = Library.Options.MenuKeybind
-
 Library:SetWatermarkVisibility(false)
-
 Library.KeybindFrame.Visible = true
 Library:OnUnload(function()
     Library.Unloaded = true
 end)
+
+print("[SUCCESS] UI Settings tab should now be working!")
