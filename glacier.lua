@@ -49,7 +49,12 @@ local function updateCameraLock()
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.CFrame.LookVector * predictionValue
             local currentPosition = camera.CFrame.p
-            local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.1)
+
+            -- Smoothness modification: Instead of a fixed linear lerp, use a delta to smooth the transition.
+            local delta = (targetPosition - currentPosition) * (smoothness / 10)
+            local newPosition = currentPosition + delta
+
+            -- Update the camera CFrame smoothly
             camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
         end
     end
