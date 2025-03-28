@@ -47,9 +47,15 @@ local function updateCameraLock()
         local targetPlayer = getNearestPlayer()
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            -- Apply prediction to target position
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.CFrame.LookVector * predictionValue
             local currentPosition = camera.CFrame.p
-            local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.05) -- Adjusted smoothness multiplier
+
+            -- Smoothness modification: Adjust Lerp multiplier based on smoothness
+            local lerpFactor = smoothness * 0.1  -- Lower values give a smoother effect
+            local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+
+            -- Update the camera CFrame smoothly to the new position
             camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
         end
     end
@@ -75,7 +81,7 @@ MainGroup:AddSlider('PredictionValue', {
     Min = 0,
     Max = 1,
     Rounding = 3,
-    Tooltip = 'Adjust the prediction value.',
+    Tooltip = 'Adjust the prediction value (higher = more ahead).',
     Callback = function(value)
         predictionValue = value
     end
