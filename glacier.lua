@@ -24,7 +24,7 @@ local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
 local triggerDelay = 50
-local lockTargetPart = "Head"  -- Default to "Head"
+local lockTargetPart = "Head" 
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -86,7 +86,7 @@ local function updateCameraLock()
             if lockTargetPart == "Head" then
                 targetPart = trackingTarget.Character:FindFirstChild("Head")
             elseif lockTargetPart == "Torso" then
-                -- Check for both UpperTorso and LowerTorso if Torso is selected
+              
                 targetPart = trackingTarget.Character:FindFirstChild("UpperTorso") or trackingTarget.Character:FindFirstChild("LowerTorso")
             end
 
@@ -114,7 +114,7 @@ local function updateCameraLock()
             if lockTargetPart == "Head" then
                 targetPart = targetPlayer.Character:FindFirstChild("Head")
             elseif lockTargetPart == "Torso" then
-                -- Check for both UpperTorso and LowerTorso if Torso is selected
+                
                 targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso")
             end
 
@@ -179,8 +179,8 @@ MainGroup:AddSlider('Smoothness', {
 
 MainGroup:AddDropdown('LockTargetPart', {
     Text = 'Lock Target Part',
-    Default = 'Head',  -- Default to "Head"
-    Values = {'Head', 'Torso'},  -- Choices for Head or Torso
+    Default = 'Head', 
+    Values = {'Head', 'Torso'},  
     Callback = function(value)
         lockTargetPart = value
     end
