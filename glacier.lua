@@ -186,8 +186,8 @@ MainGroup:AddSlider('TriggerDelay', {
 -- Add Head/Torso selection for Camera Lock
 MainGroup:AddDropdown('LockTargetPart', {
     Text = 'Lock Target Part',
-    Default = 'Head',
-    Values = {'Head', 'Torso'},
+    Default = 'Head',  -- Default to "Head"
+    Values = {'Head', 'Torso'},  -- Choices for Head or Torso
     Callback = function(value)
         lockTargetPart = value
     end
