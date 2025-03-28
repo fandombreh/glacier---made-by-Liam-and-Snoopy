@@ -178,4 +178,4 @@ Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
-print("[SUCCESS] UI Settings tab should now be working!"
+print("[SUCCESS] UI Settings tab should now be working!")
