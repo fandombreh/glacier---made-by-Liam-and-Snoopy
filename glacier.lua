@@ -51,7 +51,8 @@ local function updateCameraLock()
             local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
 
-            -- Predict the future position of the target based on their velocity and the prediction value
+            -- Calculate the predicted position based on the velocity
+            -- predictionValue scales how far ahead we predict (the higher it is, the farther ahead we predict)
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
             local currentPosition = camera.CFrame.p
