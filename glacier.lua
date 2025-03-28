@@ -14,7 +14,7 @@ local Tabs = {
     Main = Window:AddTab('Main'),
     Movement = Window:AddTab('Movement'),
     Visuals = Window:AddTab('Visuals'),
-    ['UI Settings'] = Window:AddTab('UI Settings'),  -- UI Settings tab added back
+    ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
 -- Camera lock functionality
@@ -54,21 +54,20 @@ end
 -- Function to handle health changes
 local function onHealthChanged(health)
     if health <= 0 then
-        isTracking = false  -- Stop tracking if the target is downed
+        isTracking = false -- Stop tracking if the target is downed
     end
 end
 
 -- Update the camera lock with prediction and smoothness
 local function updateCameraLock()
-    if cameraLockEnabled and isTracking and trackingTarget then
+    if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
-        local targetPlayer = trackingTarget
 
-        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
             -- Get the target player's velocity (speed and direction)
-            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-            local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
+            local targetPosition = trackingTarget.Character.HumanoidRootPart.Position
+            local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
 
             -- Predict the next position based on the velocity and prediction value
             local predictedPosition = targetPosition + targetVelocity * predictionValue
@@ -77,19 +76,32 @@ local function updateCameraLock()
             local currentPosition = camera.CFrame.p
 
             -- Apply smoothness using Lerp, based on the smoothness value
-            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)  -- Smoothness scaling
+            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1) -- Smoothness scaling
             local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
             -- Update the camera CFrame to the new predicted position
-            camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
+            camera.CFrame = CFrame.new(newPosition, trackingTarget.Character.HumanoidRootPart.Position)
         end
+    elseif cameraLockEnabled and not isTracking then
+            local camera = workspace.CurrentCamera
+            local targetPlayer = getNearestPlayer()
+            local localPlayer = game.Players.LocalPlayer
+
+            if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+                local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                local currentPosition = camera.CFrame.p
+                local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
+                local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+                camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
+            end
     end
 end
 
 game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
 
 game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
-    isTracking = false  -- Stop tracking if the player is downed
+    isTracking = false -- Stop tracking if the player is downed
 end)
 
 -- Adding the camera lock settings to the Main tab
@@ -98,7 +110,7 @@ local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera onto the player you are shooting.',
+    Tooltip = 'Locks the camera onto the player you are shooting or the nearest player.',
     Callback = function(value)
         cameraLockEnabled = value
     end
@@ -166,4 +178,4 @@ Library:OnUnload(function()
     Library.Unloaded = true
 end)
 
-print("[SUCCESS] UI Settings tab should now be working!")
+print("[SUCCESS] UI Settings tab should now be working!"
