@@ -21,8 +21,6 @@ local Tabs = {
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
-local previousPosition = nil
-local previousVelocity = Vector3.new(0, 0, 0)
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -49,17 +47,17 @@ local function updateCameraLock()
         local targetPlayer = getNearestPlayer()
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Get the target player's velocity
+            -- Get the target player's velocity (speed and direction)
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
             local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
 
-            -- Predict the next position based on the velocity and predictionValue
+            -- Predict the next position based on the velocity and prediction value
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
             -- Get the current position of the camera
             local currentPosition = camera.CFrame.p
 
-            -- Use Lerp to smoothly transition to the predicted position
+            -- Apply smoothness using Lerp, based on the smoothness value
             local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)  -- Smoothness scaling
             local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
