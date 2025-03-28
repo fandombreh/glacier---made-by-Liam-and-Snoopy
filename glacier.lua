@@ -17,14 +17,12 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
--- Camera lock functionality
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
 
--- Get the nearest player
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
     local nearestPlayer = nil
@@ -43,7 +41,6 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
--- Function to handle damage
 local function onDamageTaken(damage, attacker)
     if attacker and attacker.Character and attacker.Character:FindFirstChild("HumanoidRootPart") then
         trackingTarget = attacker
@@ -51,35 +48,28 @@ local function onDamageTaken(damage, attacker)
     end
 end
 
--- Function to handle health changes
 local function onHealthChanged(health)
     if health <= 0 then
-        isTracking = false -- Stop tracking if the target is downed
+        isTracking = false
     end
 end
 
--- Update the camera lock with prediction and smoothness
 local function updateCameraLock()
     if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Get the target player's velocity (speed and direction)
             local targetPosition = trackingTarget.Character.HumanoidRootPart.Position
             local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
 
-            -- Predict the next position based on the velocity and prediction value
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
-            -- Get the current position of the camera
             local currentPosition = camera.CFrame.p
 
-            -- Apply smoothness using Lerp, based on the smoothness value
-            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1) -- Smoothness scaling
+            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
             local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
-            -- Update the camera CFrame to the new predicted position
             camera.CFrame = CFrame.new(newPosition, trackingTarget.Character.HumanoidRootPart.Position)
         end
     elseif cameraLockEnabled and not isTracking then
@@ -88,7 +78,6 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
             local currentPosition = camera.CFrame.p
             local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
@@ -101,16 +90,14 @@ end
 game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
 
 game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
-    isTracking = false -- Stop tracking if the player is downed
+    isTracking = false
 end)
 
--- Adding the camera lock settings to the Main tab
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera onto the player you are shooting or the nearest player.',
     Callback = function(value)
         cameraLockEnabled = value
     end
@@ -122,7 +109,6 @@ MainGroup:AddSlider('PredictionValue', {
     Min = 0,
     Max = 1,
     Rounding = 3,
-    Tooltip = 'Adjust the prediction value (higher = more ahead).',
     Callback = function(value)
         predictionValue = value
     end
@@ -134,18 +120,15 @@ MainGroup:AddSlider('Smoothness', {
     Min = 0.1,
     Max = 10,
     Rounding = 1,
-    Tooltip = 'Adjust the smoothness level for camera lock.',
     Callback = function(value)
         smoothness = value
     end
 })
 
--- Listen to damage events for tracking who you are shooting
 game.Players.LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(health)
     onHealthChanged(health)
 end)
 
--- UI Settings tab setup (restoring it)
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 ThemeManager:SetFolder('EuphoriaHub')
