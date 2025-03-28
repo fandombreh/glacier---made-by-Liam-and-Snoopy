@@ -21,9 +21,8 @@ local Tabs = {
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
-local targetPlayer = nil
-local trackingTarget = false
-local currentTarget = nil
+local trackingTarget = nil
+local isTracking = false
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -45,22 +44,22 @@ end
 
 local function onDamageTaken(damage, attacker)
     if attacker and attacker.Character and attacker.Character:FindFirstChild("HumanoidRootPart") then
-        currentTarget = attacker
-        trackingTarget = true
+        trackingTarget = attacker
+        isTracking = true
     end
 end
 
 local function onHealthChanged(health)
     if health <= 0 then
-        trackingTarget = false  -- Stop tracking if the target is downed
+        isTracking = false  -- Stop tracking if the target is downed
     end
 end
 
 local function updateCameraLock()
-    if cameraLockEnabled and trackingTarget and currentTarget then
+    if cameraLockEnabled and isTracking and trackingTarget then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
-        local targetPlayer = currentTarget
+        local targetPlayer = trackingTarget
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             -- Get the target player's velocity (speed and direction)
@@ -86,7 +85,7 @@ end
 game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
 
 game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
-    trackingTarget = false  -- Stop tracking if the player is downed
+    isTracking = false  -- Stop tracking if the player is downed
 end)
 
 -- Adding the camera lock settings to the Main tab
@@ -95,7 +94,7 @@ local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera onto the nearest player you are shooting.',
+    Tooltip = 'Locks the camera onto the player you are shooting.',
     Callback = function(value)
         cameraLockEnabled = value
     end
