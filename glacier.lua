@@ -81,7 +81,15 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = trackingTarget.Character:FindFirstChild(lockTargetPart)  -- Use lockTargetPart (Head/Torso)
+            local targetPart
+            
+            if lockTargetPart == "Head" then
+                targetPart = trackingTarget.Character:FindFirstChild("Head")
+            elseif lockTargetPart == "Torso" then
+                -- Check for both UpperTorso and LowerTorso if Torso is selected
+                targetPart = trackingTarget.Character:FindFirstChild("UpperTorso") or trackingTarget.Character:FindFirstChild("LowerTorso")
+            end
+
             if targetPart then
                 local targetPosition = targetPart.Position
                 local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
@@ -101,7 +109,15 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPart = targetPlayer.Character:FindFirstChild(lockTargetPart)  -- Use lockTargetPart (Head/Torso)
+            local targetPart
+            
+            if lockTargetPart == "Head" then
+                targetPart = targetPlayer.Character:FindFirstChild("Head")
+            elseif lockTargetPart == "Torso" then
+                -- Check for both UpperTorso and LowerTorso if Torso is selected
+                targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso")
+            end
+
             if targetPart then
                 local targetPosition = targetPart.Position
                 local currentPosition = camera.CFrame.p
@@ -161,6 +177,15 @@ MainGroup:AddSlider('Smoothness', {
     end
 })
 
+MainGroup:AddDropdown('LockTargetPart', {
+    Text = 'Lock Target Part',
+    Default = 'Head',  -- Default to "Head"
+    Values = {'Head', 'Torso'},  -- Choices for Head or Torso
+    Callback = function(value)
+        lockTargetPart = value
+    end
+})
+
 MainGroup:AddToggle('Triggerbot', {
     Text = 'Enable Triggerbot',
     Default = false,
@@ -180,16 +205,6 @@ MainGroup:AddSlider('TriggerDelay', {
     Rounding = 0,
     Callback = function(value)
         triggerDelay = value
-    end
-})
-
--- Add Head/Torso selection for Camera Lock
-MainGroup:AddDropdown('LockTargetPart', {
-    Text = 'Lock Target Part',
-    Default = 'Head',  -- Default to "Head"
-    Values = {'Head', 'Torso'},  -- Choices for Head or Torso
-    Callback = function(value)
-        lockTargetPart = value
     end
 })
 
