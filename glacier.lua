@@ -21,6 +21,9 @@ local Tabs = {
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
+local targetPlayer = nil
+local trackingTarget = false
+local currentTarget = nil
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -40,11 +43,24 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
+local function onDamageTaken(damage, attacker)
+    if attacker and attacker.Character and attacker.Character:FindFirstChild("HumanoidRootPart") then
+        currentTarget = attacker
+        trackingTarget = true
+    end
+end
+
+local function onHealthChanged(health)
+    if health <= 0 then
+        trackingTarget = false  -- Stop tracking if the target is downed
+    end
+end
+
 local function updateCameraLock()
-    if cameraLockEnabled then
+    if cameraLockEnabled and trackingTarget and currentTarget then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
-        local targetPlayer = getNearestPlayer()
+        local targetPlayer = currentTarget
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             -- Get the target player's velocity (speed and direction)
@@ -69,13 +85,17 @@ end
 
 game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
 
+game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
+    trackingTarget = false  -- Stop tracking if the player is downed
+end)
+
 -- Adding the camera lock settings to the Main tab
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera onto the nearest player.',
+    Tooltip = 'Locks the camera onto the nearest player you are shooting.',
     Callback = function(value)
         cameraLockEnabled = value
     end
@@ -104,6 +124,13 @@ MainGroup:AddSlider('Smoothness', {
         smoothness = value
     end
 })
+
+-- Listen to damage events for tracking who you are shooting
+game.Players.LocalPlayer.Character.Humanoid.DamageChanged:Connect(function(damage, attacker)
+    if damage > 0 then
+        onDamageTaken(damage, attacker)
+    end
+end)
 
 -- UI Settings tab setup
 ThemeManager:SetLibrary(Library)
