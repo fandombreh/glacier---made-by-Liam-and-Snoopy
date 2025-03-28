@@ -24,6 +24,7 @@ local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
 local triggerDelay = 50
+local lockTargetPart = "Head"  -- Default to "Head"
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -80,9 +81,9 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetHead = trackingTarget.Character:FindFirstChild("Head")
-            if targetHead then
-                local targetPosition = targetHead.Position
+            local targetPart = trackingTarget.Character:FindFirstChild(lockTargetPart)  -- Use lockTargetPart (Head/Torso)
+            if targetPart then
+                local targetPosition = targetPart.Position
                 local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
 
                 local predictedPosition = targetPosition + targetVelocity * predictionValue
@@ -91,7 +92,7 @@ local function updateCameraLock()
                 local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
                 local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
-                camera.CFrame = CFrame.new(newPosition, targetHead.Position)
+                camera.CFrame = CFrame.new(newPosition, targetPart.Position)
             end
         end
     elseif cameraLockEnabled and not isTracking then
@@ -100,13 +101,13 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetHead = targetPlayer.Character:FindFirstChild("Head")
-            if targetHead then
-                local targetPosition = targetHead.Position
+            local targetPart = targetPlayer.Character:FindFirstChild(lockTargetPart)  -- Use lockTargetPart (Head/Torso)
+            if targetPart then
+                local targetPosition = targetPart.Position
                 local currentPosition = camera.CFrame.p
                 local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
                 local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
-                camera.CFrame = CFrame.new(newPosition, targetHead.Position)
+                camera.CFrame = CFrame.new(newPosition, targetPart.Position)
             end
         end
     end
@@ -179,6 +180,16 @@ MainGroup:AddSlider('TriggerDelay', {
     Rounding = 0,
     Callback = function(value)
         triggerDelay = value
+    end
+})
+
+-- Add Head/Torso selection for Camera Lock
+MainGroup:AddDropdown('LockTargetPart', {
+    Text = 'Lock Target Part',
+    Default = 'Head',
+    Values = {'Head', 'Torso'},
+    Callback = function(value)
+        lockTargetPart = value
     end
 })
 
