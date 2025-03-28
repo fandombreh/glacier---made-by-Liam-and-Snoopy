@@ -43,6 +43,21 @@ local function isTargetValid(target)
     return false
 end
 
+-- Function to Predict Target Position Based on Velocity and Prediction Value
+local function predictTargetPosition(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid.RootPart then
+        local velocity = humanoid.RootPart.AssemblyLinearVelocity
+        local targetPosition = character:FindFirstChild(targetPart)
+        if targetPosition then
+            -- Predict the target's position based on their velocity and prediction value
+            local predictedPosition = targetPosition.Position + velocity * predictionValue
+            return predictedPosition
+        end
+    end
+    return nil
+end
+
 -- Triggerbot Function
 local function triggerShot()
     if triggerbotEnabled and Mouse.Target and isTargetValid(Mouse.Target) then
@@ -80,7 +95,7 @@ end
 
 local function updateCameraLock()
     if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character then
-        local camera, targetPosition = workspace.CurrentCamera, getTargetPosition(trackingTarget.Character)
+        local camera, targetPosition = workspace.CurrentCamera, predictTargetPosition(trackingTarget.Character)
         if camera and LocalPlayer.Character and targetPosition then
             local currentPosition = camera.CFrame.p
             local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
