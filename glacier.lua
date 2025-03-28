@@ -64,22 +64,26 @@ local function isAimingAtPlayer(target)
     return hitPart and hitPart.Parent == target.Character
 end
 
--- Triggerbot function with added checks
-local function triggerbot()
-    while triggerbotEnabled do
-        local target = getNearestPlayer()
-        if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-            local humanoid = target.Character.Humanoid
-            local localPlayer = game.Players.LocalPlayer
+-- Function to check if player has a gun equipped
+local function hasGunEquipped()
+    local localPlayer = game.Players.LocalPlayer
+    local tool = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Tool")
+    return tool and tool.Name == "Gun"  -- Replace "Gun" with the actual name of the gun in your game
+end
 
-            -- Check if the player has a gun out and is aiming at a target
-            local tool = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool and tool.Name == "Gun" and humanoid.Health > 0 and isAimingAtPlayer(target) then
-                wait(triggerDelay / 1000)
-                mouse1click()
+-- Function that runs on mouse input to activate triggerbot only if conditions are met
+local function onMouseInput(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then  -- Left mouse button click
+        if triggerbotEnabled then
+            local target = getNearestPlayer()
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                -- Check if the player has a gun equipped and is aiming at the target
+                if hasGunEquipped() and isAimingAtPlayer(target) then
+                    -- Trigger the shot
+                    mouse1click()
+                end
             end
         end
-        wait(0.1)
     end
 end
 
@@ -141,9 +145,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     -- Triggerbot Hotkey (T)
     if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == triggerbotHotkey then
         triggerbotEnabled = not triggerbotEnabled
-        if triggerbotEnabled then
-            spawn(triggerbot)
-        end
     end
 
     -- Camera Lock Hotkey (C)
@@ -151,6 +152,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         cameraLockEnabled = not cameraLockEnabled
     end
 end)
+
+-- Connect mouse input event to triggerbot logic
+UserInputService.InputBegan:Connect(onMouseInput)
 
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
@@ -189,9 +193,6 @@ MainGroup:AddToggle('Triggerbot', {
     Default = false,
     Callback = function(value)
         triggerbotEnabled = value
-        if triggerbotEnabled then
-            spawn(triggerbot)
-        end
     end
 })
 
