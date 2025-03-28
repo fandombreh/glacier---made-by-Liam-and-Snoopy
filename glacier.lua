@@ -19,7 +19,7 @@ local Tabs = {
 
 -- Camera lock functionality
 local cameraLockEnabled = false
-local predictionValue = 0.027
+local predictionValue = 0.5
 local smoothness = 1
 
 local function getNearestPlayer()
@@ -51,8 +51,8 @@ local function updateCameraLock()
             local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
 
-            -- Calculate the predicted position based on the velocity
-            -- predictionValue scales how far ahead we predict (the higher it is, the farther ahead we predict)
+            -- Calculate predicted position based on the velocity and prediction value
+            -- predictionValue determines how far ahead we predict based on the target's speed
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
             local currentPosition = camera.CFrame.p
@@ -84,7 +84,7 @@ MainGroup:AddToggle('CameraLock', {
 
 MainGroup:AddSlider('PredictionValue', {
     Text = 'Prediction',
-    Default = 0.027,
+    Default = 0.5,
     Min = 0,
     Max = 1,
     Rounding = 3,
