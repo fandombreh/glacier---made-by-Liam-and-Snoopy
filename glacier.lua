@@ -66,8 +66,20 @@ local function triggerbot()
             if target and target.Character and target.Character:FindFirstChild("Humanoid") then
                 local humanoid = target.Character.Humanoid
                 if humanoid.Health > 0 then
+                    -- Simulate mouse click using UserInputService
+                    local UserInputService = game:GetService("UserInputService")
+                    local mouse = game.Players.LocalPlayer:GetMouse()
+
+                    -- Create a fake input to simulate a left mouse click
+                    local input = Instance.new("InputObject")
+                    input.UserInputType = Enum.UserInputType.MouseButton1
+                    input.Position = mouse.Position -- Get the mouse position for clicking
+
+                    -- Call InputBegan and InputEnded to simulate the click
+                    UserInputService.InputBegan:Fire(input, false)
+                    UserInputService.InputEnded:Fire(input)
+
                     wait(triggerDelay / 1000)
-                    mouse1click()
                 end
             end
         end
