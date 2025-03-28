@@ -49,12 +49,7 @@ local function updateCameraLock()
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.CFrame.LookVector * predictionValue
             local currentPosition = camera.CFrame.p
-
-            -- Smoothness modification: Instead of a fixed linear lerp, use a delta to smooth the transition.
-            local delta = (targetPosition - currentPosition) * (smoothness / 10)
-            local newPosition = currentPosition + delta
-
-            -- Update the camera CFrame smoothly
+            local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.05) -- Adjusted smoothness multiplier
             camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
         end
     end
@@ -89,10 +84,10 @@ MainGroup:AddSlider('PredictionValue', {
 MainGroup:AddSlider('Smoothness', {
     Text = 'Smoothness',
     Default = 1,
-    Min = 0,
+    Min = 0.1, -- changed min to 0.1 to avoid divide by zero or other issues.
     Max = 10,
     Rounding = 1,
-    Tooltip = 'Set the smoothness level for camera lock.',
+    Tooltip = 'Adjust the smoothness level for camera lock.',
     Callback = function(value)
         smoothness = value
     end
