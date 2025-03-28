@@ -22,6 +22,8 @@ local predictionValue = 0.5
 local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
+local lockKey = Enum.KeyCode.One
+local unlockKey = Enum.KeyCode.Two
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -85,18 +87,16 @@ MainGroup:AddToggle('CameraLock', {
 MainGroup:AddKeyPicker('CameraLockKey', {
     Text = 'Lock Key',
     Default = 'One',
-    Callback = function()
-        trackingTarget = getNearestPlayer()
-        cameraLockEnabled = true
+    Callback = function(key)
+        lockKey = key
     end
 })
 
 MainGroup:AddKeyPicker('UnlockKey', {
     Text = 'Unlock Key',
     Default = 'Two',
-    Callback = function()
-        cameraLockEnabled = false
-        trackingTarget = nil
+    Callback = function(key)
+        unlockKey = key
     end
 })
 
@@ -148,4 +148,16 @@ Library:SetWatermarkVisibility(false)
 Library.KeybindFrame.Visible = true
 Library:OnUnload(function()
     Library.Unloaded = true
+end)
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed then
+        if input.KeyCode == lockKey then
+            trackingTarget = getNearestPlayer()
+            cameraLockEnabled = true
+        elseif input.KeyCode == unlockKey then
+            cameraLockEnabled = false
+            trackingTarget = nil
+        end
+    end
 end)
