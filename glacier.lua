@@ -23,7 +23,14 @@ local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
-local triggerDelay = 50 
+local triggerDelay = 50
+
+local UserInputService = game:GetService("UserInputService")
+
+
+local triggerbotHotkey = Enum.KeyCode.T  
+
+local cameraLockHotkey = Enum.KeyCode.C  
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -106,6 +113,24 @@ game:GetService("RunService").RenderStepped:Connect(updateCameraLock)
 
 game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
     isTracking = false
+end)
+
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == triggerbotHotkey then
+        triggerbotEnabled = not triggerbotEnabled
+        if triggerbotEnabled then
+            spawn(triggerbot)
+        end
+    end
+
+   
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == cameraLockHotkey then
+        cameraLockEnabled = not cameraLockEnabled
+    end
 end)
 
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
