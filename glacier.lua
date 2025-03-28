@@ -68,7 +68,8 @@ local function triggerbot()
                 if humanoid.Health > 0 then
                     wait(triggerDelay / 1000)
                     local mouse = game.Players.LocalPlayer:GetMouse()
-                    mouse1click()  -- Adjust this to your method of triggering mouse click
+                    mouse.Button1Down:Fire() -- Corrected: Using Fire() for mouse click
+                    wait(0.1) -- Add a small delay after click
                 end
             end
         end
