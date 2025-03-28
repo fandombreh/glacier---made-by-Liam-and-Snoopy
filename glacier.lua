@@ -22,9 +22,16 @@ local predictionValue = 0.5
 local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
-local triggerbotEnabled = false
-local triggerDelay = 50
-local lockTargetPart = "Head" -- Default to "Head"
+local targetPart = "Head" -- Default target part
+
+local function getTargetPosition(character)
+    if character and character:FindFirstChild(targetPart) then
+        return character[targetPart].Position
+    elseif character and character:FindFirstChild("HumanoidRootPart") then
+        return character.HumanoidRootPart.Position
+    end
+    return nil
+end
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -40,75 +47,33 @@ local function getNearestPlayer()
             end
         end
     end
-
     return nearestPlayer
 end
 
-local function hasGunEquipped()
-    local localPlayer = game.Players.LocalPlayer
-    local character = localPlayer.Character
-    if character then
-        local gunNames = {"Pistol", "AK-47", "Shotgun", "Uzi", "RPG", "Mac-10", "M4A1", "Deagle", "Double Barrel", "Glock", "DB"}
-        for _, gunName in ipairs(gunNames) do
-            local tool = character:FindFirstChild(gunName)
-            if tool then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-local function triggerbot()
-    while triggerbotEnabled do
-        if hasGunEquipped() then
-            local target = getNearestPlayer()
-            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                local humanoid = target.Character.Humanoid
-                if humanoid.Health > 0 then
-                    wait(triggerDelay / 1000)
-
-                    -- Improved way to simulate mouse click action
-                    local mouse = game.Players.LocalPlayer:GetMouse()
-                    mouse:Click()  -- Simulates a mouse click
-                    
-                    wait(0.1) -- Add a small delay after click
-                end
-            end
-        end
-        wait(0.1)
-    end
-end
-
 local function updateCameraLock()
-    if cameraLockEnabled then
+    if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character then
         local camera = workspace.CurrentCamera
         local localPlayer = game.Players.LocalPlayer
-        local targetPlayer = isTracking and trackingTarget or getNearestPlayer()
-
-        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character then
-            local targetPart
-
-            if lockTargetPart == "Head" then
-                targetPart = targetPlayer.Character:FindFirstChild("Head")
-            elseif lockTargetPart == "Torso" then
-                targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso") or targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-            end
-
-            if targetPart then
-                local targetPosition = targetPart.Position
-                local predictedPosition = targetPosition
-
-                if isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
-                    predictedPosition = targetPosition + targetVelocity * predictionValue
-                end
-
+        local targetPosition = getTargetPosition(trackingTarget.Character)
+        
+        if camera and localPlayer.Character and targetPosition then
+            local currentPosition = camera.CFrame.p
+            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
+            local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+            camera.CFrame = CFrame.new(newPosition, targetPosition)
+        end
+    elseif cameraLockEnabled and not isTracking then
+        local camera = workspace.CurrentCamera
+        local targetPlayer = getNearestPlayer()
+        local localPlayer = game.Players.LocalPlayer
+        
+        if camera and localPlayer.Character and targetPlayer and targetPlayer.Character then
+            local targetPosition = getTargetPosition(targetPlayer.Character)
+            if targetPosition then
                 local currentPosition = camera.CFrame.p
                 local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-                local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
-
-                camera.CFrame = CFrame.new(newPosition, targetPart.Position)
+                local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+                camera.CFrame = CFrame.new(newPosition, targetPosition)
             end
         end
     end
@@ -127,16 +92,6 @@ MainGroup:AddToggle('CameraLock', {
     Default = false,
     Callback = function(value)
         cameraLockEnabled = value
-        if cameraLockEnabled then
-            local nearestPlayer = getNearestPlayer()
-            if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                trackingTarget = nearestPlayer
-                isTracking = true
-            end
-        else
-            trackingTarget = nil
-            isTracking = false
-        end
     end
 })
 
@@ -162,34 +117,13 @@ MainGroup:AddSlider('Smoothness', {
     end
 })
 
-MainGroup:AddDropdown('LockTargetPart', {
-    Text = 'Lock Target Part',
-    Default = 'Head',
-    Values = {'Head', 'Torso'},
-    Callback = function(value)
-        lockTargetPart = value
-    end
-})
-
-MainGroup:AddToggle('Triggerbot', {
-    Text = 'Enable Triggerbot',
-    Default = false,
-    Callback = function(value)
-        triggerbotEnabled = value
-        if triggerbotEnabled then
-            spawn(triggerbot)
-        end
-    end
-})
-
-MainGroup:AddSlider('TriggerDelay', {
-    Text = 'Trigger Delay (ms)',
-    Default = 50,
-    Min = 0,
-    Max = 500,
-    Rounding = 0,
-    Callback = function(value)
-        triggerDelay = value
+MainGroup:AddDropdown('TargetPartDropdown', {
+    Values = {"Head", "Torso"},
+    Default = "Head",
+    Multi = false,
+    Text = "Target Part",
+    Callback = function(selected)
+        targetPart = selected == "Torso" and "HumanoidRootPart" or "Head"
     end
 })
 
@@ -197,7 +131,7 @@ game.Players.LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(healt
     if health <= 0 then
         isTracking = false
     end
-})
+end)
 
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
