@@ -69,8 +69,8 @@ local function triggerbot()
                     wait(triggerDelay / 1000)
 
                     -- Improved way to simulate mouse click action
-                    local UserInputService = game:GetService("UserInputService")
-                    UserInputService.InputBegan:Fire({KeyCode = Enum.KeyCode.LeftClick}) -- Simulates a mouse click
+                    local mouse = game.Players.LocalPlayer:GetMouse()
+                    mouse:Click()  -- Simulates a mouse click
                     
                     wait(0.1) -- Add a small delay after click
                 end
