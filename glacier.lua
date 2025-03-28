@@ -58,6 +58,22 @@ local function hasGunEquipped()
     return false
 end
 
+local function triggerbot()
+    while triggerbotEnabled do
+        if hasGunEquipped() then
+            local target = getNearestPlayer()
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                local humanoid = target.Character.Humanoid
+                if humanoid.Health > 0 then
+                    wait(triggerDelay / 1000)
+                    mouse1click()
+                end
+            end
+        end
+        wait(0.1)
+    end
+end
+
 local function updateCameraLock()
     if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character and trackingTarget.Character:FindFirstChild("HumanoidRootPart") then
         local camera = workspace.CurrentCamera
@@ -135,6 +151,28 @@ MainGroup:AddSlider('Smoothness', {
     Rounding = 1,
     Callback = function(value)
         smoothness = value
+    end
+})
+
+MainGroup:AddToggle('Triggerbot', {
+    Text = 'Enable Triggerbot',
+    Default = false,
+    Callback = function(value)
+        triggerbotEnabled = value
+        if triggerbotEnabled then
+            spawn(triggerbot)
+        end
+    end
+})
+
+MainGroup:AddSlider('TriggerDelay', {
+    Text = 'Trigger Delay (ms)',
+    Default = 50,
+    Min = 0,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(value)
+        triggerDelay = value
     end
 })
 
