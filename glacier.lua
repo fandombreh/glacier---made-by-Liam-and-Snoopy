@@ -80,16 +80,19 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPosition = trackingTarget.Character.HumanoidRootPart.Position
-            local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
+            local targetHead = trackingTarget.Character:FindFirstChild("Head")
+            if targetHead then
+                local targetPosition = targetHead.Position
+                local targetVelocity = trackingTarget.Character.HumanoidRootPart.Velocity
 
-            local predictedPosition = targetPosition + targetVelocity * predictionValue
+                local predictedPosition = targetPosition + targetVelocity * predictionValue
 
-            local currentPosition = camera.CFrame.p
-            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-            local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
+                local currentPosition = camera.CFrame.p
+                local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
+                local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
-            camera.CFrame = CFrame.new(newPosition, trackingTarget.Character.HumanoidRootPart.Position)
+                camera.CFrame = CFrame.new(newPosition, targetHead.Position)
+            end
         end
     elseif cameraLockEnabled and not isTracking then
         local camera = workspace.CurrentCamera
@@ -97,11 +100,14 @@ local function updateCameraLock()
         local localPlayer = game.Players.LocalPlayer
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-            local currentPosition = camera.CFrame.p
-            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-            local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
-            camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
+            local targetHead = targetPlayer.Character:FindFirstChild("Head")
+            if targetHead then
+                local targetPosition = targetHead.Position
+                local currentPosition = camera.CFrame.p
+                local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
+                local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+                camera.CFrame = CFrame.new(newPosition, targetHead.Position)
+            end
         end
     end
 end
