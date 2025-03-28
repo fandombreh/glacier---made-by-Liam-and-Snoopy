@@ -23,15 +23,7 @@ local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
 local triggerbotEnabled = false
-local triggerDelay = 50
-
-local UserInputService = game:GetService("UserInputService")
-local workspace = game:GetService("Workspace")
-
--- Hotkey for Triggerbot
-local triggerbotHotkey = Enum.KeyCode.T  -- Default T key to toggle Triggerbot
--- Hotkey for Camera Lock
-local cameraLockHotkey = Enum.KeyCode.C  -- Default C key to toggle Camera Lock
+local triggerDelay = 50 
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -51,39 +43,35 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
--- Function to check if crosshair is aimed at a player
-local function isAimingAtPlayer(target)
-    local localPlayer = game.Players.LocalPlayer
-    local camera = workspace.CurrentCamera
-    local mouse = localPlayer:GetMouse()
-
-    local ray = camera:ScreenPointToRay(mouse.X, mouse.Y)
-    local hitPart, hitPosition = workspace:FindPartOnRayWithWhitelist(ray, {target.Character})
-
-    -- Check if the hit part is the player's HumanoidRootPart or a part of the player
-    return hitPart and hitPart.Parent == target.Character
-end
-
--- Function to check if player has a gun equipped
 local function hasGunEquipped()
     local localPlayer = game.Players.LocalPlayer
-    local tool = localPlayer.Character and localPlayer.Character:FindFirstChildOfClass("Tool")
-    return tool and tool.Name == "Gun"  -- Replace "Gun" with the actual name of the gun in your game
+    local character = localPlayer.Character
+    if character then
+        
+        local gunNames = {"Pistol", "AK-47", "Shotgun", "Uzi", "RPG", "Mac-10", "M4A1", "Deagle", "Double Barrel" , "Glock", "DB"} 
+        for _, gunName in ipairs(gunNames) do
+            local tool = character:FindFirstChild(gunName)
+            if tool then
+                return true
+            end
+        end
+    end
+    return false
 end
 
--- Function that runs on mouse input to activate triggerbot only if conditions are met
-local function onMouseInput(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then  -- Left mouse button click
-        if triggerbotEnabled then
+local function triggerbot()
+    while triggerbotEnabled do
+        if hasGunEquipped() then
             local target = getNearestPlayer()
             if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-                -- Check if the player has a gun equipped and is aiming at the target
-                if hasGunEquipped() and isAimingAtPlayer(target) then
-                    -- Trigger the shot
+                local humanoid = target.Character.Humanoid
+                if humanoid.Health > 0 then
+                    wait(triggerDelay / 1000)
                     mouse1click()
                 end
             end
         end
+        wait(0.1)
     end
 end
 
@@ -138,24 +126,6 @@ game.Players.LocalPlayer.Character.Humanoid.Died:Connect(function()
     isTracking = false
 end)
 
--- Hotkey handlers
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-
-    -- Triggerbot Hotkey (T)
-    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == triggerbotHotkey then
-        triggerbotEnabled = not triggerbotEnabled
-    end
-
-    -- Camera Lock Hotkey (C)
-    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == cameraLockHotkey then
-        cameraLockEnabled = not cameraLockEnabled
-    end
-end)
-
--- Connect mouse input event to triggerbot logic
-UserInputService.InputBegan:Connect(onMouseInput)
-
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
 MainGroup:AddToggle('CameraLock', {
@@ -193,6 +163,9 @@ MainGroup:AddToggle('Triggerbot', {
     Default = false,
     Callback = function(value)
         triggerbotEnabled = value
+        if triggerbotEnabled then
+            spawn(triggerbot)
+        end
     end
 })
 
