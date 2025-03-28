@@ -21,6 +21,8 @@ local Tabs = {
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
+local previousPosition = nil
+local previousVelocity = Vector3.new(0, 0, 0)
 
 local function getNearestPlayer()
     local localPlayer = game.Players.LocalPlayer
@@ -47,22 +49,21 @@ local function updateCameraLock()
         local targetPlayer = getNearestPlayer()
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Get the target player's velocity (speed and direction)
-            local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
+            -- Get the target player's velocity
             local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+            local targetVelocity = targetPlayer.Character.HumanoidRootPart.Velocity
 
-            -- Calculate predicted position based on the velocity and prediction value
-            -- predictionValue determines how far ahead we predict based on the target's speed
+            -- Predict the next position based on the velocity and predictionValue
             local predictedPosition = targetPosition + targetVelocity * predictionValue
 
+            -- Get the current position of the camera
             local currentPosition = camera.CFrame.p
 
-            -- Apply smoothness to transition the camera smoothly towards the predicted position
-            local timeDelta = game:GetService("RunService").Heartbeat:Wait()
-            local lerpFactor = math.clamp(smoothness * timeDelta, 0.01, 0.1)  -- Use time delta to smooth out the movement
+            -- Use Lerp to smoothly transition to the predicted position
+            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)  -- Smoothness scaling
             local newPosition = currentPosition:Lerp(predictedPosition, lerpFactor)
 
-            -- Update the camera CFrame smoothly to the new predicted position
+            -- Update the camera CFrame to the new predicted position
             camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
         end
     end
@@ -97,7 +98,7 @@ MainGroup:AddSlider('PredictionValue', {
 MainGroup:AddSlider('Smoothness', {
     Text = 'Smoothness',
     Default = 1,
-    Min = 0.1, -- changed min to 0.1 to avoid divide by zero or other issues.
+    Min = 0.1,
     Max = 10,
     Rounding = 1,
     Tooltip = 'Adjust the smoothness level for camera lock.',
