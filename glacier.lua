@@ -32,16 +32,42 @@ local cameraLockEnabled = false
 local predictionValue = 0.027
 local smoothness = 1
 
+local function getNearestPlayer()
+    local localPlayer = game.Players.LocalPlayer
+    local localCharacter = localPlayer.Character
+    if not localCharacter then return nil end
+
+    local localRoot = localCharacter:FindFirstChild("HumanoidRootPart")
+    if not localRoot then return nil end
+
+    local nearestPlayer = nil
+    local nearestDistance = math.huge
+
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character then
+            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local distance = (localRoot.Position - targetRoot.Position).Magnitude
+                if distance < nearestDistance then
+                    nearestDistance = distance
+                    nearestPlayer = targetRoot
+                end
+            end
+        end
+    end
+    return nearestPlayer
+end
+
 local function updateCameraLock()
     if cameraLockEnabled then
         local camera = workspace.CurrentCamera
-        local humanoidRootPart = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetRoot = getNearestPlayer()
 
-        if camera and humanoidRootPart then
-            local targetPosition = humanoidRootPart.Position + humanoidRootPart.CFrame.LookVector * predictionValue
+        if camera and targetRoot then
+            local targetPosition = targetRoot.Position + targetRoot.CFrame.LookVector * predictionValue
             local currentPosition = camera.CFrame.p
             local newPosition = currentPosition:Lerp(targetPosition, smoothness * 0.1)
-            camera.CFrame = CFrame.new(newPosition, humanoidRootPart.Position)
+            camera.CFrame = CFrame.new(newPosition, targetRoot.Position)
         end
     end
 end
@@ -54,7 +80,7 @@ local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 MainGroup:AddToggle('CameraLock', {
     Text = 'Enable Camera Lock',
     Default = false,
-    Tooltip = 'Locks the camera in place.',
+    Tooltip = 'Locks onto the nearest player.',
     Callback = function(value)
         cameraLockEnabled = value
     end
