@@ -83,18 +83,18 @@ local function updateCameraLock()
             camera.CFrame = CFrame.new(newPosition, trackingTarget.Character.HumanoidRootPart.Position)
         end
     elseif cameraLockEnabled and not isTracking then
-            local camera = workspace.CurrentCamera
-            local targetPlayer = getNearestPlayer()
-            local localPlayer = game.Players.LocalPlayer
+        local camera = workspace.CurrentCamera
+        local targetPlayer = getNearestPlayer()
+        local localPlayer = game.Players.LocalPlayer
 
-            if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
 
-                local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                local currentPosition = camera.CFrame.p
-                local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-                local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
-                camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
-            end
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+            local currentPosition = camera.CFrame.p
+            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
+            local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
+            camera.CFrame = CFrame.new(newPosition, targetPlayer.Character.HumanoidRootPart.Position)
+        end
     end
 end
 
