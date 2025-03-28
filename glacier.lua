@@ -67,8 +67,11 @@ local function triggerbot()
                 local humanoid = target.Character.Humanoid
                 if humanoid.Health > 0 then
                     wait(triggerDelay / 1000)
-                    local mouse = game.Players.LocalPlayer:GetMouse()
-                    mouse.Button1Down:Fire() -- Corrected: Using Fire() for mouse click
+
+                    -- Improved way to simulate mouse click action
+                    local UserInputService = game:GetService("UserInputService")
+                    UserInputService.InputBegan:Fire({KeyCode = Enum.KeyCode.LeftClick}) -- Simulates a mouse click
+                    
                     wait(0.1) -- Add a small delay after click
                 end
             end
@@ -89,7 +92,6 @@ local function updateCameraLock()
             if lockTargetPart == "Head" then
                 targetPart = targetPlayer.Character:FindFirstChild("Head")
             elseif lockTargetPart == "Torso" then
-                -- Prioritize UpperTorso, then LowerTorso, then HumanoidRootPart as a fallback
                 targetPart = targetPlayer.Character:FindFirstChild("UpperTorso") or targetPlayer.Character:FindFirstChild("LowerTorso") or targetPlayer.Character:FindFirstChild("HumanoidRootPart")
             end
 
@@ -162,8 +164,8 @@ MainGroup:AddSlider('Smoothness', {
 
 MainGroup:AddDropdown('LockTargetPart', {
     Text = 'Lock Target Part',
-    Default = 'Head', -- Default to "Head"
-    Values = {'Head', 'Torso'}, -- Choices for Head or Torso
+    Default = 'Head',
+    Values = {'Head', 'Torso'},
     Callback = function(value)
         lockTargetPart = value
     end
