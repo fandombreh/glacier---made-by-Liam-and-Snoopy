@@ -48,11 +48,12 @@ local function updateCameraLock()
 
         if camera and localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
             -- Apply prediction to target position
-            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.CFrame.LookVector * predictionValue
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position + targetPlayer.Character.HumanoidRootPart.Velocity * predictionValue
             local currentPosition = camera.CFrame.p
 
-            -- Smoothness modification: Adjust Lerp multiplier based on smoothness
-            local lerpFactor = smoothness * 0.1  -- Lower values give a smoother effect
+            -- Apply smoothness based on lerp factor over time
+            local timeDelta = game:GetService("RunService").Heartbeat:Wait()
+            local lerpFactor = math.clamp(smoothness * timeDelta, 0.01, 0.1)  -- Using time delta to ensure smooth transition
             local newPosition = currentPosition:Lerp(targetPosition, lerpFactor)
 
             -- Update the camera CFrame smoothly to the new position
