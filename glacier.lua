@@ -141,10 +141,8 @@ MainGroup:AddSlider('Smoothness', {
 })
 
 -- Listen to damage events for tracking who you are shooting
-game.Players.LocalPlayer.Character.Humanoid.DamageChanged:Connect(function(damage, attacker)
-    if damage > 0 then
-        onDamageTaken(damage, attacker)
-    end
+game.Players.LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(health)
+    onHealthChanged(health)
 end)
 
 -- UI Settings tab setup (restoring it)
