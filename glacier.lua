@@ -17,7 +17,7 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
--- Camera Lock Variables
+
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
@@ -25,15 +25,15 @@ local trackingTarget = nil
 local isTracking = false
 local targetPart = "Head"
 
--- Triggerbot Variables
+
 local triggerbotEnabled = false
-local triggerDelay = 100 -- Default 100ms
+local triggerDelay = 100 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local RunService = game:GetService("RunService")
 
--- Function to Check if Target is Valid
+
 local function isTargetValid(target)
     if target and target.Parent then
         local character = target.Parent
@@ -43,14 +43,14 @@ local function isTargetValid(target)
     return false
 end
 
--- Function to Predict Target Position Based on Velocity and Prediction Value
+
 local function predictTargetPosition(character)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if humanoid and humanoid.RootPart then
         local velocity = humanoid.RootPart.AssemblyLinearVelocity
         local targetPosition = character:FindFirstChild(targetPart)
         if targetPosition then
-            -- Predict the target's position based on their velocity and prediction value
+            
             local predictedPosition = targetPosition.Position + velocity * predictionValue
             return predictedPosition
         end
@@ -58,11 +58,11 @@ local function predictTargetPosition(character)
     return nil
 end
 
--- Triggerbot Function
+
 local function triggerShot()
     if triggerbotEnabled and Mouse.Target and isTargetValid(Mouse.Target) then
-        wait(triggerDelay / 1000) -- Convert ms to seconds
-        -- Simulate mouse click using VirtualInputManager
+        wait(triggerDelay / 1000) 
+        
         game:GetService("VirtualInputManager"):SendInputBegin(Enum.UserInputType.MouseButton1)
         game:GetService("VirtualInputManager"):SendInputEnd(Enum.UserInputType.MouseButton1)
     end
@@ -70,7 +70,7 @@ end
 
 RunService.RenderStepped:Connect(triggerShot)
 
--- Camera Lock Functions
+
 local function getTargetPosition(character)
     if character and character:FindFirstChild(targetPart) then
         return character[targetPart].Position
@@ -116,7 +116,7 @@ end
 
 RunService.RenderStepped:Connect(updateCameraLock)
 
--- UI Components
+
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
 MainGroup:AddToggle('CameraLock', {
@@ -159,7 +159,7 @@ MainGroup:AddDropdown('TargetPartDropdown', {
     end
 })
 
--- Triggerbot UI Components
+
 local TriggerbotGroup = Tabs['Main']:AddRightGroupbox('Triggerbot Settings')
 
 TriggerbotGroup:AddToggle('Triggerbot', {
@@ -181,7 +181,7 @@ TriggerbotGroup:AddSlider('TriggerDelay', {
     end
 })
 
--- Handle Character Reset
+
 LocalPlayer.Character.Humanoid.Died:Connect(function()
     isTracking = false
 end)
@@ -192,7 +192,7 @@ LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(health)
     end
 end)
 
--- UI Settings
+
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 ThemeManager:SetFolder('EuphoriaHub')
