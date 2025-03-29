@@ -17,105 +17,63 @@ local Tabs = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
-
 local cameraLockEnabled = false
 local predictionValue = 0.5
 local smoothness = 1
 local trackingTarget = nil
 local isTracking = false
 local targetPart = "Head"
+local cameraLockKey = Enum.KeyCode.C  -- Default Keybind
 
-
-local triggerbotEnabled = false
-local triggerDelay = 100 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
+local function getClosestPlayerToMouse()
+    local closestPlayer, shortestDistance = nil, math.huge
+    local mousePosition = UserInputService:GetMouseLocation()
 
-local function isTargetValid(target)
-    if target and target.Parent then
-        local character = target.Parent
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        return humanoid and humanoid.Health > 0 and character ~= LocalPlayer.Character
-    end
-    return false
-end
-
-
-local function predictTargetPosition(character)
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid and humanoid.RootPart then
-        local velocity = humanoid.RootPart.AssemblyLinearVelocity
-        local targetPosition = character:FindFirstChild(targetPart)
-        if targetPosition then
-            
-            local predictedPosition = targetPosition.Position + velocity * predictionValue
-            return predictedPosition
-        end
-    end
-    return nil
-end
-
-
-local function triggerShot()
-    if triggerbotEnabled and Mouse.Target and isTargetValid(Mouse.Target) then
-        wait(triggerDelay / 1000) 
-        
-        game:GetService("VirtualInputManager"):SendInputBegin(Enum.UserInputType.MouseButton1)
-        game:GetService("VirtualInputManager"):SendInputEnd(Enum.UserInputType.MouseButton1)
-    end
-end
-
-RunService.RenderStepped:Connect(triggerShot)
-
-
-local function getTargetPosition(character)
-    if character and character:FindFirstChild(targetPart) then
-        return character[targetPart].Position
-    elseif character and character:FindFirstChild("HumanoidRootPart") then
-        return character.HumanoidRootPart.Position
-    end
-    return nil
-end
-
-local function getNearestPlayer()
-    local nearestPlayer, shortestDistance = nil, math.huge
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-            if distance < shortestDistance then
-                shortestDistance, nearestPlayer = distance, player
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(targetPart) then
+            local screenPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character[targetPart].Position)
+            if onScreen then
+                local distance = (Vector2.new(screenPosition.X, screenPosition.Y) - mousePosition).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance, closestPlayer = distance, player
+                end
             end
         end
     end
-    return nearestPlayer
+    return closestPlayer
 end
 
 local function updateCameraLock()
-    if cameraLockEnabled and isTracking and trackingTarget and trackingTarget.Character then
-        local camera, targetPosition = workspace.CurrentCamera, predictTargetPosition(trackingTarget.Character)
-        if camera and LocalPlayer.Character and targetPosition then
-            local currentPosition = camera.CFrame.p
-            local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-            camera.CFrame = CFrame.new(currentPosition:Lerp(targetPosition, lerpFactor), targetPosition)
-        end
-    elseif cameraLockEnabled and not isTracking then
-        local camera, targetPlayer = workspace.CurrentCamera, getNearestPlayer()
-        if camera and LocalPlayer.Character and targetPlayer and targetPlayer.Character then
-            local targetPosition = getTargetPosition(targetPlayer.Character)
-            if targetPosition then
+    if cameraLockEnabled then
+        if isTracking and trackingTarget and trackingTarget.Character then
+            local camera, targetPosition = workspace.CurrentCamera, trackingTarget.Character:FindFirstChild(targetPart)
+            if camera and LocalPlayer.Character and targetPosition then
                 local currentPosition = camera.CFrame.p
                 local lerpFactor = math.clamp(smoothness * 0.05, 0.01, 0.1)
-                camera.CFrame = CFrame.new(currentPosition:Lerp(targetPosition, lerpFactor), targetPosition)
+                camera.CFrame = CFrame.new(currentPosition:Lerp(targetPosition.Position, lerpFactor), targetPosition.Position)
             end
         end
     end
 end
 
-RunService.RenderStepped:Connect(updateCameraLock)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == cameraLockKey then
+        if isTracking then
+            trackingTarget = nil
+            isTracking = false
+        else
+            trackingTarget = getClosestPlayerToMouse()
+            isTracking = trackingTarget ~= nil
+        end
+    end
+end)
 
+RunService.RenderStepped:Connect(updateCameraLock)
 
 local MainGroup = Tabs['Main']:AddLeftGroupbox('Camera Settings')
 
@@ -159,64 +117,18 @@ MainGroup:AddDropdown('TargetPartDropdown', {
     end
 })
 
-
-local TriggerbotGroup = Tabs['Main']:AddRightGroupbox('Triggerbot Settings')
-
-TriggerbotGroup:AddToggle('Triggerbot', {
-    Text = 'Enable Triggerbot',
-    Default = false,
-    Callback = function(value)
-        triggerbotEnabled = value
+-- Camera Lock Keybind
+MainGroup:AddKeyPicker('CameraLockKeybind', {
+    Default = 'C',
+    NoUI = false,
+    Text = 'Camera Lock Keybind',
+    Callback = function(key)
+        cameraLockKey = Enum.KeyCode[key]
     end
 })
-
-TriggerbotGroup:AddSlider('TriggerDelay', {
-    Text = 'Trigger Delay (ms)',
-    Default = 100,
-    Min = 0,
-    Max = 500,
-    Rounding = 1,
-    Callback = function(value)
-        triggerDelay = value
-    end
-})
-
-
-LocalPlayer.Character.Humanoid.Died:Connect(function()
-    isTracking = false
-end)
-
-LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(health)
-    if health <= 0 then
-        isTracking = false
-    end
-end)
-
-
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-ThemeManager:SetFolder('EuphoriaHub')
-SaveManager:SetFolder('EuphoriaHub/configs')
 
 local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
 
 MenuGroup:AddButton('Unload', function()
     Library:Unload()
-end)
-
-MenuGroup:AddLabel('Menu Keybind')
-MenuGroup:AddKeyPicker('MenuKeybind', {
-    Default = 'End',
-    NoUI = true,
-    Text = 'Menu Keybind'
-})
-
-local ThemeGroup = Tabs['UI Settings']:AddLeftGroupbox('Themes')
-ThemeManager:ApplyToTab(Tabs['UI Settings'])
-
-Library.ToggleKeybind = Library.Options.MenuKeybind
-Library:SetWatermarkVisibility(false)
-Library.KeybindFrame.Visible = true
-Library:OnUnload(function()
-    Library.Unloaded = true
 end)
