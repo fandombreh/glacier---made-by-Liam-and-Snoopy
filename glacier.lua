@@ -292,3 +292,8 @@ local function isGunOut()
     end
     return false
 end
+
+
+local function makeDraggable(frame)
+    local dragging = false
+    local dragInput, mousePos, framePos
