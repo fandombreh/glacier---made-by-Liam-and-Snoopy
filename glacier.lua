@@ -295,5 +295,10 @@ end
 
 
 local function makeDraggable(frame)
-    local dragging = false
-    local dragInput, mousePos, framePos
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function updateInput(input)
+        local
