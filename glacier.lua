@@ -35,8 +35,6 @@ local Frame_17 = Instance.new("Frame")
 local UICorner_6 = Instance.new("UICorner")
 local Frame_18 = Instance.new("Frame")
 
-
-
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -278,7 +276,6 @@ Frame_18.BorderSizePixel = 0
 Frame_18.Position = UDim2.new(1.65999997, 0, -0.301801801, 0)
 Frame_18.Size = UDim2.new(0, 100, 0, 100)
 
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -288,9 +285,10 @@ local Camera = workspace.CurrentCamera
 local camLockEnabled = false
 local triggerBotEnabled = false
 
-
 local function isGunOut()
     local character = LocalPlayer.Character
     if character and character:FindFirstChildOfClass("Tool") then
         return true
     end
+    return false
+end
